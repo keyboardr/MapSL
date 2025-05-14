@@ -1,6 +1,6 @@
 package com.keyboardr.mapsl
 
-internal expect class ConcurrentMap<K, V>(): MutableMap<K, V> {
+internal expect class ConcurrentMap<K, V>() : MutableMap<K, V> {
 
   fun computeIfAbsent(key: K, default: () -> V): V
 

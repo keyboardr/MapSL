@@ -13,7 +13,7 @@ public open class SingletonKey<T : Any>(override val type: KClass<T>) :
 
   override fun getValue(
     params: Unit,
-    entry: ServiceEntry<T>
+    entry: ServiceEntry<T>,
   ): T = (entry as ParamlessServiceEntry<T>).service
 
   public class Entry<T>(override val service: T) : ParamlessServiceEntry<T>

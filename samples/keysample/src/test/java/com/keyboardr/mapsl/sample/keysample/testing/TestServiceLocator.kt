@@ -2,12 +2,12 @@ package com.keyboardr.mapsl.sample.keysample.testing
 
 import androidx.test.core.app.ApplicationProvider
 import com.keyboardr.mapsl.ExperimentalKeyType
+import com.keyboardr.mapsl.keys.put
+import com.keyboardr.mapsl.lifecycle.put
 import com.keyboardr.mapsl.sample.keysample.domain.lifecycle.LifecycleScopedManager
 import com.keyboardr.mapsl.sample.keysample.domain.single.PreregisteredSingleton
 import com.keyboardr.mapsl.sample.keysample.locator.ProcessServiceLocator
 import com.keyboardr.mapsl.sample.keysample.locator.ServiceLocatorScope
-import com.keyboardr.mapsl.keys.put
-import com.keyboardr.mapsl.lifecycle.put
 import com.keyboardr.mapsl.testing.TestingServiceLocator
 import org.mockito.Mockito.mock
 import kotlin.reflect.KClass

@@ -116,7 +116,10 @@ class LazyKeyTest {
   private class TestServiceLocator : ServiceLocator() {
     var missed = false
 
-    override fun <T : Any, GetParams> onMiss(key: ServiceKey<T, *, GetParams, *>, params: GetParams): T {
+    override fun <T : Any, GetParams> onMiss(
+      key: ServiceKey<T, *, GetParams, *>,
+      params: GetParams,
+    ): T {
       missed = true
       return super.onMiss(key, params)
     }

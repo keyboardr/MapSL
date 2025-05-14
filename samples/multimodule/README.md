@@ -1,6 +1,7 @@
 # Multimodule Sample
 
-This project demonstrates how MapSL can be used in a multi-module environment. The project has the following modules:
+This project demonstrates how MapSL can be used in a multi-module environment. The project has the
+following modules:
 
 - `app` - An Android application
 - `desktop` - A desktop JVM application

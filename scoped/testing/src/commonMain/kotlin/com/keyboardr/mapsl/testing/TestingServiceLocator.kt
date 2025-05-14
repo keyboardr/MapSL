@@ -32,7 +32,7 @@ public abstract class TestingServiceLocator<S>(scope: S) :
   override fun <T : Any, GetParams> getValue(
     key: ServiceKey<T, *, GetParams, *>,
     params: GetParams,
-    entry: ServiceEntry<T>
+    entry: ServiceEntry<T>,
   ): T = if (entry is MockEntry) entry.getMock() else super.getValue(key, params, entry)
 
   /**
@@ -40,7 +40,7 @@ public abstract class TestingServiceLocator<S>(scope: S) :
    */
   final override fun <T : Any, GetParams> onMiss(
     key: ServiceKey<T, *, GetParams, *>,
-    params: GetParams
+    params: GetParams,
   ): T {
     return getValue(key, params, getOrProvideEntry(key) { createMockEntry(key) })
   }
@@ -50,7 +50,7 @@ public abstract class TestingServiceLocator<S>(scope: S) :
    */
   final override fun <T : Any, PutParams> onInvalidScope(
     key: ServiceKey<T, *, *, PutParams>,
-    putParams: PutParams
+    putParams: PutParams,
   ): ServiceEntry<T> {
     return createMockEntry(key)
   }

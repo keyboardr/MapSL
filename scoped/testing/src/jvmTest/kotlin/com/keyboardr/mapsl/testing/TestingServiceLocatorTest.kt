@@ -114,6 +114,7 @@ class TestingServiceLocatorTest {
     assertTrue(mockingDetails(first).isMock)
     assertTrue(mockingDetails(second).isMock)
   }
+
   @Test
   fun getOrProvide_allowedScope_lazyKey_returnsReal_sameInstance() {
     val serviceLocator = TestServiceLocator()

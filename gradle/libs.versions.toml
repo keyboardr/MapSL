@@ -44,7 +44,7 @@ robolectric = { group = "org.robolectric", name = "robolectric", version = "4.13
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
-dokka = { id = "org.jetbrains.dokka", version.ref = "dokka"}
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 jetbrains-compose = { id = "org.jetbrains.compose", version.ref = "jetbrainsCompose" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

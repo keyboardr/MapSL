@@ -192,7 +192,7 @@ class LifecycleKeyTest {
 
     override fun <T : Any, GetParams> onMiss(
       key: ServiceKey<T, *, GetParams, *>,
-      params: GetParams
+      params: GetParams,
     ): T {
       missed = true
       return super.onMiss(key, params)

@@ -1,10 +1,10 @@
 package com.keyboardr.mapsl
 
 import com.keyboardr.mapsl.keys.LazyClassKey
+import com.keyboardr.mapsl.keys.LazyKey.Companion.defaultLazyKeyThreadSafetyMode
 import com.keyboardr.mapsl.keys.ServiceEntry
 import com.keyboardr.mapsl.keys.ServiceKey
 import com.keyboardr.mapsl.keys.put
-import com.keyboardr.mapsl.keys.LazyKey.Companion.defaultLazyKeyThreadSafetyMode
 import kotlin.reflect.KClass
 
 /**
@@ -19,13 +19,13 @@ public open class SimpleServiceLocator<out S>(scope: S, allowReregister: Boolean
 
     override fun <T : Any, PutParams> onInvalidScope(
       key: ServiceKey<T, *, *, PutParams>,
-      putParams: PutParams
+      putParams: PutParams,
     ): ServiceEntry<T> = SimpleEntry(onInvalidScope(key.type))
 
     override fun <T : Any, GetParams> getValue(
       key: ServiceKey<T, *, GetParams, *>,
       params: GetParams,
-      entry: ServiceEntry<T>
+      entry: ServiceEntry<T>,
     ): T = if (entry is SimpleEntry<T>) entry.value else super.getValue(key, params, entry)
   }
 

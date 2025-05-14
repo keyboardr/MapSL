@@ -24,7 +24,6 @@ kotlin {
   }
 
   sourceSets {
-    val desktopMain by getting
     commonMain.dependencies {
       implementation(projects.simple)
 

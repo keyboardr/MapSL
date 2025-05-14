@@ -57,7 +57,7 @@ fun Greeting(
   lifecycleScopedManager: LifecycleScopedManager,
   factoryProducedItems: List<FactoryProduced>,
   onCreateFromFactory: () -> Unit,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
 ) {
   Column(modifier.verticalScroll(rememberScrollState())) {
     Text(text = "Preregistered: ${PreregisteredSingleton.instance.sayHello()}")

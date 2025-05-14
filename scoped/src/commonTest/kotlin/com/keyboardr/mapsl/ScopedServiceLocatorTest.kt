@@ -56,7 +56,7 @@ class ScopedServiceLocatorTest {
     val serviceLocator = object : ScopedServiceLocator<Unit>(Unit) {
       override fun <T : Any, PutParams> onInvalidScope(
         key: ServiceKey<T, *, *, PutParams>,
-        putParams: PutParams
+        putParams: PutParams,
       ): ServiceEntry<T> {
         invalidScopeCalled = true
         return super.onInvalidScope(key, putParams)

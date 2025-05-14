@@ -1,7 +1,6 @@
 package com.keyboardr.mapsl.sample.basic
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.keyboardr.mapsl.sample.basic.MyService
 import com.keyboardr.mapsl.sample.basic.testing.TestServiceLocator
 import org.junit.Before
 import org.junit.Test

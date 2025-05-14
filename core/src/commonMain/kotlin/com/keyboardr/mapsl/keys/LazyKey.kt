@@ -16,12 +16,12 @@ public open class LazyKey<T : Any>(override val type: KClass<T>) :
 
   override fun getValue(
     params: Unit,
-    entry: ServiceEntry<T>
+    entry: ServiceEntry<T>,
   ): T = (entry as ParamlessServiceEntry<T>).service
 
   public class PutParams<T>(
     public val provider: () -> T,
-    public val threadSafetyMode: LazyThreadSafetyMode
+    public val threadSafetyMode: LazyThreadSafetyMode,
   )
 
   public inner class Entry<T : Any>(
@@ -74,7 +74,7 @@ private fun ServiceLocator.getDefaultParams() =
 public fun <T : Any> ServiceLocator.put(
   key: LazyKey<T>,
   threadSafetyMode: LazyThreadSafetyMode = getDefaultParams().threadSafetyMode,
-  provider: () -> T
+  provider: () -> T,
 ) {
   put(key, LazyKey.PutParams<T>(provider, threadSafetyMode))
 }

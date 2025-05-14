@@ -12,7 +12,7 @@ object ProcessServiceLocator {
   fun register(
     serviceLocator: SimpleServiceLocator<ServiceLocatorScope>,
     applicationContext: PlatformContext,
-    registrationBlock: SimpleServiceLocator<ServiceLocatorScope>.() -> Unit = {}
+    registrationBlock: SimpleServiceLocator<ServiceLocatorScope>.() -> Unit = {},
   ) {
     if (serviceLocator.scope is ServiceLocatorScope.ProdScope) {
       check(!::instance.isInitialized) { "ProcessServiceLocator is already initialized" }
@@ -37,7 +37,8 @@ sealed interface ServiceLocatorScope {
 
 
 /**
- * A property delegate to access a service stored in [ProcessServiceLocator] using [getOrProvide].
+ * A property delegate to access a service stored in [ProcessServiceLocator] using
+ * [SimpleServiceLocator.getOrProvide].
  */
 inline fun <reified T : Any> serviceLocator(
   noinline allowedScopes: (ServiceLocatorScope) -> Boolean = { it is ServiceLocatorScope.ProdScope },

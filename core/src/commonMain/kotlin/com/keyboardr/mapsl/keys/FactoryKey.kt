@@ -13,7 +13,7 @@ public open class FactoryKey<T : Any>(override val type: KClass<T>) :
 
   override fun getValue(
     params: Unit,
-    entry: ServiceEntry<T>
+    entry: ServiceEntry<T>,
   ): T {
     return (entry as Entry<T>).create()
   }

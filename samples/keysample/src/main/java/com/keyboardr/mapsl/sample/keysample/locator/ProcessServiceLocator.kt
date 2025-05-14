@@ -20,7 +20,7 @@ object ProcessServiceLocator {
   fun register(
     serviceLocator: ScopedServiceLocator<ServiceLocatorScope>,
     applicationContext: Context,
-    registrationBlock: ScopedServiceLocator<ServiceLocatorScope>.() -> Unit = {}
+    registrationBlock: ScopedServiceLocator<ServiceLocatorScope>.() -> Unit = {},
   ) {
     if (serviceLocator.scope is ServiceLocatorScope.ProdScope) {
       check(!::instance.isInitialized) { "ProcessServiceLocator is already initialized" }

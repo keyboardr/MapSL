@@ -10,9 +10,9 @@ import com.keyboardr.mapsl.sample.multimodule.services.BazManager
 import com.keyboardr.mapsl.sample.multimodule.services.BazManagerImpl
 import com.keyboardr.mapsl.sample.multimodule.services.FooManager
 import com.keyboardr.mapsl.testing.SimpleTestingServiceLocator
+import org.mockito.Mockito.mock
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
-import org.mockito.Mockito.mock
 import kotlin.reflect.KClass
 
 object PreviewServiceLocator :

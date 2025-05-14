@@ -85,7 +85,7 @@ class ServiceLocatorTest {
     @Suppress("UNCHECKED_CAST") val serviceLocator = object : ServiceLocator() {
       override fun <T : Any, GetParams> onMiss(
         key: ServiceKey<T, *, GetParams, *>,
-        params: GetParams
+        params: GetParams,
       ): T {
         return missItem as? T ?: throw AssertionError()
       }
@@ -137,7 +137,7 @@ class ServiceLocatorTest {
 
     override fun <T : Any, GetParams> onMiss(
       key: ServiceKey<T, *, GetParams, *>,
-      params: GetParams
+      params: GetParams,
     ): T {
       missed = true
       return super.onMiss(key, params)
@@ -146,7 +146,7 @@ class ServiceLocatorTest {
     fun <T : Any> getOrProvide(
       key: LazyKey<T>,
       threadSafetyMode: LazyThreadSafetyMode = defaultLazyKeyThreadSafetyMode,
-      provider: () -> T
+      provider: () -> T,
     ): T = getValue(
       key,
       Unit,

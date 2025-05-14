@@ -1,7 +1,7 @@
 package com.keyboardr.mapsl.keys
 
-import com.keyboardr.mapsl.get
 import com.keyboardr.mapsl.ServiceLocator
+import com.keyboardr.mapsl.get
 import kotlin.test.Test
 import kotlin.test.assertFails
 import kotlin.test.assertFalse
@@ -58,7 +58,10 @@ class ClassKeyTest {
   private class TestServiceLocator : ServiceLocator() {
     var missed = false
 
-    override fun <T : Any, GetParams> onMiss(key: ServiceKey<T, *, GetParams, *>, params: GetParams): T {
+    override fun <T : Any, GetParams> onMiss(
+      key: ServiceKey<T, *, GetParams, *>,
+      params: GetParams,
+    ): T {
       missed = true
       return super.onMiss(key, params)
     }

@@ -2,8 +2,6 @@ package com.keyboardr.mapsl.sample.basic
 
 import android.content.Context
 import com.keyboardr.mapsl.SimpleServiceLocator
-import kotlin.properties.ReadOnlyProperty
-import kotlin.reflect.KProperty
 
 object ProcessServiceLocator {
   lateinit var instance: SimpleServiceLocator<ServiceLocatorScope>
@@ -12,7 +10,7 @@ object ProcessServiceLocator {
   fun register(
     serviceLocator: SimpleServiceLocator<ServiceLocatorScope>,
     applicationContext: Context,
-    registrationBlock: SimpleServiceLocator<ServiceLocatorScope>.() -> Unit = {}
+    registrationBlock: SimpleServiceLocator<ServiceLocatorScope>.() -> Unit = {},
   ) {
     if (serviceLocator.scope == ServiceLocatorScope.Production) {
       check(!::instance.isInitialized) { "ProcessServiceLocator is already initialized" }

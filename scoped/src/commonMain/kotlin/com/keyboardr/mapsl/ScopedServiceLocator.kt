@@ -11,7 +11,7 @@ import com.keyboardr.mapsl.keys.ServiceKey
  */
 public open class ScopedServiceLocator<out S>(
   public val scope: S,
-  allowReregister: Boolean = false
+  allowReregister: Boolean = false,
 ) :
   ServiceLocator(allowReregister) {
 
@@ -53,7 +53,7 @@ public open class ScopedServiceLocator<out S>(
    */
   public open fun <T : Any, PutParams> onInvalidScope(
     key: ServiceKey<T, *, *, PutParams>,
-    putParams: PutParams
+    putParams: PutParams,
   ): ServiceEntry<T> =
     throw ServiceLocatorException("Unsupported scope $scope for key $key", key)
 }
@@ -67,7 +67,7 @@ public open class ScopedServiceLocator<out S>(
 public fun <S, T : Any, PutParams> ScopedServiceLocator<S>.getOrProvide(
   key: ServiceKey<T, *, Unit, PutParams>,
   allowedScopes: (S) -> Boolean,
-  putParams: PutParams
+  putParams: PutParams,
 ): T {
   return getOrProvide(key, allowedScopes, putParams, Unit)
 }

@@ -2,7 +2,12 @@
 
 package com.keyboardr.mapsl
 
-import com.keyboardr.mapsl.keys.*
+import com.keyboardr.mapsl.keys.ClassKey
+import com.keyboardr.mapsl.keys.FactoryKey
+import com.keyboardr.mapsl.keys.LazyKey
+import com.keyboardr.mapsl.keys.ServiceEntry
+import com.keyboardr.mapsl.keys.ServiceKey
+import com.keyboardr.mapsl.keys.SingletonKey
 
 
 /**
@@ -55,7 +60,7 @@ public abstract class ServiceLocator(private val allowReregister: Boolean = fals
    */
   protected open fun <T : Any, GetParams> onMiss(
     key: ServiceKey<T, *, GetParams, *>,
-    params: GetParams
+    params: GetParams,
   ): T =
     throw ServiceLocatorException("No value found for key: $key", key)
 
@@ -73,7 +78,7 @@ public abstract class ServiceLocator(private val allowReregister: Boolean = fals
   @Suppress("UNCHECKED_CAST")
   public fun <T : Any, GetParams> getOrNull(
     key: ServiceKey<T, *, GetParams, *>,
-    params: GetParams
+    params: GetParams,
   ): T? =
     serviceMap[key]?.let { entry -> getValue(key, params, entry as ServiceEntry<T>) }
 
@@ -100,7 +105,7 @@ public abstract class ServiceLocator(private val allowReregister: Boolean = fals
   internal fun <T : Any, GetParams, PutParams> getOrProvideValue(
     key: ServiceKey<T, *, GetParams, PutParams>,
     getParams: GetParams,
-    putParams: () -> PutParams
+    putParams: () -> PutParams,
   ): T {
     val entry = getOrProvideEntry(key, { key.createEntry(putParams()) })
     return getValue(key, getParams, entry)
@@ -113,7 +118,7 @@ public abstract class ServiceLocator(private val allowReregister: Boolean = fals
   protected open fun <T : Any, GetParams> getValue(
     key: ServiceKey<T, *, GetParams, *>,
     params: GetParams,
-    entry: ServiceEntry<T>
+    entry: ServiceEntry<T>,
   ): T {
     return key.getValue(params, entry)
   }

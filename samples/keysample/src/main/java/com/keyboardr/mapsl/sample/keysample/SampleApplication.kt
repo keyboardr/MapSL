@@ -3,21 +3,19 @@ package com.keyboardr.mapsl.sample.keysample
 import android.annotation.SuppressLint
 import android.app.ActivityManager
 import android.app.Application
-import androidx.core.content.getSystemService
 import android.os.Build
 import android.os.Process
+import androidx.core.content.getSystemService
 import com.keyboardr.mapsl.ExperimentalKeyType
 import com.keyboardr.mapsl.ScopedServiceLocator
-import com.keyboardr.mapsl.keys.LazyKey
 import com.keyboardr.mapsl.keys.put
 import com.keyboardr.mapsl.lifecycle.put
-import com.keyboardr.mapsl.sample.keysample.locator.ProcessServiceLocator
-import com.keyboardr.mapsl.sample.keysample.locator.ServiceLocatorScope
 import com.keyboardr.mapsl.sample.keysample.domain.factory.FactoryProduced
 import com.keyboardr.mapsl.sample.keysample.domain.lifecycle.LifecycleScopedManager
 import com.keyboardr.mapsl.sample.keysample.domain.single.LazyPreregisteredSingleton
 import com.keyboardr.mapsl.sample.keysample.domain.single.PreregisteredSingleton
-import com.keyboardr.mapsl.sample.keysample.locator.serviceLocator
+import com.keyboardr.mapsl.sample.keysample.locator.ProcessServiceLocator
+import com.keyboardr.mapsl.sample.keysample.locator.ServiceLocatorScope
 import kotlin.time.ExperimentalTime
 
 class SampleApplication : Application() {

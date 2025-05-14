@@ -7,7 +7,7 @@ import com.keyboardr.mapsl.sample.multimodule.platform.PlatformContext
 
 @OpenForTesting
 open class FooManager private constructor(
-  private val context: PlatformContext = ProcessServiceLocator.applicationContext
+  private val context: PlatformContext = ProcessServiceLocator.applicationContext,
 ) {
 
   fun sayHello() = "Hello, ${context.applicationId} from FooManager"
