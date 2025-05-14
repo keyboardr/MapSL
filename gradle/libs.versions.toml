@@ -1,0 +1,53 @@
+[versions]
+android-compileSdk = "36"
+android-targetSdk = "36"
+android-minSdk = "24"
+
+agp = "8.9.2"
+kotlin = "2.1.10"
+coroutines = "1.10.2"
+androidx-core = "1.16.0"
+androidx-lifetime = "2.9.0"
+androidx-test = "1.6.1"
+androidx-test-junit = "1.2.1"
+activityCompose = "1.10.1"
+composeBom = "2025.05.00"
+jetbrainsCompose = "1.7.3"
+dokka = "2.0.0"
+
+[libraries]
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+androidx-annotation = { group = "androidx.annotation", name = "annotation", version = "1.9.1" }
+androidx-core = { group = "androidx.core", name = "core-ktx", version.ref = "androidx-core" }
+androidx-lifecycle = { group = "androidx.lifecycle", name = "lifecycle-common", version.ref = "androidx-lifetime" }
+androidx-lifecycle-runtime = { group = "androidx.lifecycle", name = "lifecycle-runtime", version.ref = "androidx-lifetime" }
+
+kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version = "0.6.2" }
+
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-ui = { group = "androidx.compose.ui", name = "ui" }
+androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
+androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+
+stately-collections = { group = "co.touchlab", name = "stately-concurrent-collections", version = "2.0.0" }
+
+# Testing
+androidx-test = { group = "androidx.test", name = "core-ktx", version.ref = "androidx-test" }
+androidx-test-junit = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "androidx-test-junit" }
+androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.ref = "kotlin" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
+mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version = "5.4.0" }
+robolectric = { group = "org.robolectric", name = "robolectric", version = "4.13" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka"}
+jetbrains-compose = { id = "org.jetbrains.compose", version.ref = "jetbrainsCompose" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }

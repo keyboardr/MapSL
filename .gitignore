@@ -1,0 +1,16 @@
+*.iml
+.gradle
+.idea/*
+!.idea/misc.xml
+!.idea/runConfigurations.xml
+!.idea/vcs.xml
+!.idea/inspectionProfiles/
+!.idea/runConfigurations/
+.DS_Store
+.kotlin
+build
+captures
+.externalNativeBuild
+.cxx
+local.properties
+xcuserdata
