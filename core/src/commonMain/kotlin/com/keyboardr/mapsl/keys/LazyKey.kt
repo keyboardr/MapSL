@@ -21,12 +21,8 @@ public open class LazyKey<T : Any>(override val type: KClass<T>) :
 
   public class PutParams<T>(
     public val provider: () -> T,
-    public val threadSafetyMode: LazyThreadSafetyMode = defaultThreadSafetyMode
-  ) {
-    public companion object {
-      public val defaultThreadSafetyMode: LazyThreadSafetyMode = LazyThreadSafetyMode.SYNCHRONIZED
-    }
-  }
+    public val threadSafetyMode: LazyThreadSafetyMode
+  )
 
   public inner class Entry<T : Any>(
     loader: () -> T,
@@ -50,7 +46,26 @@ public open class LazyKey<T : Any>(override val type: KClass<T>) :
   override fun toString(): String {
     return "LazyKey(type=$type)"
   }
+
+  public companion object {
+    public var ServiceLocator.defaultLazyKeyThreadSafetyMode
+      get() = getDefaultParams().threadSafetyMode
+      set(value) {
+        getDefaultParams().threadSafetyMode = value
+      }
+  }
 }
+
+private class DefaultParams {
+  var threadSafetyMode: LazyThreadSafetyMode = LazyThreadSafetyMode.SYNCHRONIZED
+
+  companion object {
+    val key = SingletonKey<DefaultParams>()
+  }
+}
+
+private fun ServiceLocator.getDefaultParams() =
+  getOrProvideValue(DefaultParams.key, Unit) { DefaultParams() }
 
 /**
  * Registers a provider for [key]. [provider] will be invoked the first time a value is
@@ -58,7 +73,7 @@ public open class LazyKey<T : Any>(override val type: KClass<T>) :
  */
 public fun <T : Any> ServiceLocator.put(
   key: LazyKey<T>,
-  threadSafetyMode: LazyThreadSafetyMode = LazyKey.PutParams.defaultThreadSafetyMode,
+  threadSafetyMode: LazyThreadSafetyMode = getDefaultParams().threadSafetyMode,
   provider: () -> T
 ) {
   put(key, LazyKey.PutParams<T>(provider, threadSafetyMode))

@@ -41,7 +41,7 @@ sealed interface ServiceLocatorScope {
  */
 inline fun <reified T : Any> serviceLocator(
   noinline allowedScopes: (ServiceLocatorScope) -> Boolean = { it is ServiceLocatorScope.ProdScope },
-  threadSafetyMode: LazyThreadSafetyMode = LazyThreadSafetyMode.SYNCHRONIZED,
+  threadSafetyMode: LazyThreadSafetyMode = ProcessServiceLocator.instance.defaultThreadSafetyMode,
   noinline provider: (ServiceLocatorScope) -> T,
 ): ReadOnlyProperty<Any, T> = object : ReadOnlyProperty<Any, T> {
   override fun getValue(thisRef: Any, property: KProperty<*>): T =

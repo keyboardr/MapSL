@@ -6,6 +6,7 @@ import androidx.lifecycle.LifecycleOwner
 import com.keyboardr.mapsl.ExperimentalKeyType
 import com.keyboardr.mapsl.ServiceLocator
 import com.keyboardr.mapsl.keys.LazyKey
+import com.keyboardr.mapsl.keys.LazyKey.Companion.defaultLazyKeyThreadSafetyMode
 import com.keyboardr.mapsl.keys.ServiceEntry
 import com.keyboardr.mapsl.keys.ServiceKey
 import kotlin.concurrent.Volatile
@@ -37,7 +38,7 @@ public class LifecycleKey<T : Any>(override val type: KClass<T>) :
 
   public data class PutParams<T>(
     val minimumState: Lifecycle.State = Lifecycle.State.STARTED,
-    val threadSafetyMode: LazyThreadSafetyMode = LazyKey.PutParams.defaultThreadSafetyMode,
+    val threadSafetyMode: LazyThreadSafetyMode,
     val provider: () -> T
   )
 
@@ -78,7 +79,7 @@ public class LifecycleKey<T : Any>(override val type: KClass<T>) :
 public fun <T : Any> ServiceLocator.put(
   key: LifecycleKey<T>,
   minimumState: Lifecycle.State = Lifecycle.State.STARTED,
-  threadSafetyMode: LazyThreadSafetyMode = LazyKey.PutParams.defaultThreadSafetyMode,
+  threadSafetyMode: LazyThreadSafetyMode = defaultLazyKeyThreadSafetyMode,
   provider: () -> T
 ) {
   put(key, LifecycleKey.PutParams(minimumState, threadSafetyMode, provider))

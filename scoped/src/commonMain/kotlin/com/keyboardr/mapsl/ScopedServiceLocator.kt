@@ -1,6 +1,7 @@
 package com.keyboardr.mapsl
 
 import com.keyboardr.mapsl.keys.LazyKey
+import com.keyboardr.mapsl.keys.LazyKey.Companion.defaultLazyKeyThreadSafetyMode
 import com.keyboardr.mapsl.keys.ServiceEntry
 import com.keyboardr.mapsl.keys.ServiceKey
 
@@ -8,7 +9,10 @@ import com.keyboardr.mapsl.keys.ServiceKey
  * A [ServiceLocator] which applies to a given scope. The [scope] is used to
  * determine whether this [ServiceLocator] is appropriate for the current context.
  */
-public open class ScopedServiceLocator<out S>(public val scope: S, allowReregister: Boolean = false) :
+public open class ScopedServiceLocator<out S>(
+  public val scope: S,
+  allowReregister: Boolean = false
+) :
   ServiceLocator(allowReregister) {
 
   /**
@@ -31,7 +35,7 @@ public open class ScopedServiceLocator<out S>(public val scope: S, allowReregist
 
   public inline fun <reified T : Any> getOrProvide(
     noinline allowedScopes: (S) -> Boolean,
-    threadSafetyMode: LazyThreadSafetyMode = LazyKey.PutParams.defaultThreadSafetyMode,
+    threadSafetyMode: LazyThreadSafetyMode = defaultLazyKeyThreadSafetyMode,
     noinline provider: () -> T,
   ): T {
     return getOrProvide(
@@ -54,6 +58,12 @@ public open class ScopedServiceLocator<out S>(public val scope: S, allowReregist
     throw ServiceLocatorException("Unsupported scope $scope for key $key", key)
 }
 
+/**
+ * Fetches the item for [key]. If the key has not been previously registered, will create a new
+ * entry using [putParams]. If [allowedScopes] returns `false` for this [ServiceLocator]'s
+ * [scope][ScopedServiceLocator.scope], the created entry will come from
+ * [ScopedServiceLocator.onInvalidScope].
+ */
 public fun <S, T : Any, PutParams> ScopedServiceLocator<S>.getOrProvide(
   key: ServiceKey<T, *, Unit, PutParams>,
   allowedScopes: (S) -> Boolean,
@@ -62,10 +72,19 @@ public fun <S, T : Any, PutParams> ScopedServiceLocator<S>.getOrProvide(
   return getOrProvide(key, allowedScopes, putParams, Unit)
 }
 
+
+/**
+ * Fetches the item for [key]. If the key has not been previously registered, will create a new
+ * entry using [provider]. If [allowedScopes] returns `false` for this [ServiceLocator]'s
+ * [scope][ScopedServiceLocator.scope], the created entry will come from
+ * [ScopedServiceLocator.onInvalidScope].
+ *
+ * The multi-thread behavior depends on [threadSafetyMode].
+ */
 public fun <S, T : Any> ScopedServiceLocator<S>.getOrProvide(
   key: LazyKey<T>,
   allowedScopes: (S) -> Boolean,
-  threadSafetyMode: LazyThreadSafetyMode = LazyKey.PutParams.defaultThreadSafetyMode,
+  threadSafetyMode: LazyThreadSafetyMode = defaultLazyKeyThreadSafetyMode,
   provider: () -> T,
 ): T {
   return getOrProvide(key, allowedScopes, LazyKey.PutParams(provider, threadSafetyMode), Unit)

@@ -4,6 +4,7 @@ import com.keyboardr.mapsl.keys.LazyClassKey
 import com.keyboardr.mapsl.keys.ServiceEntry
 import com.keyboardr.mapsl.keys.ServiceKey
 import com.keyboardr.mapsl.keys.put
+import com.keyboardr.mapsl.keys.LazyKey.Companion.defaultLazyKeyThreadSafetyMode
 import kotlin.reflect.KClass
 
 /**
@@ -32,16 +33,32 @@ public open class SimpleServiceLocator<out S>(scope: S, allowReregister: Boolean
 
   public val scope: S = backingServiceLocator.scope
 
+  /**
+   * The default [LazyThreadSafetyMode] used for lazy-initialized dependencies
+   * managed by the service locator.
+   *
+   * Defaults to [LazyThreadSafetyMode.SYNCHRONIZED] to ensure thread-safe
+   * initialization by default. This can be changed if a different trade-off
+   * between thread safety and performance is desired for most lazy initializations.
+   *
+   * @see LazyThreadSafetyMode
+   */
+  public var defaultThreadSafetyMode: LazyThreadSafetyMode
+    get() = backingServiceLocator.defaultLazyKeyThreadSafetyMode
+    set(value) {
+      backingServiceLocator.defaultLazyKeyThreadSafetyMode = value
+    }
+
   public fun <T : Any> put(
     key: KClass<T>,
-    threadSafetyMode: LazyThreadSafetyMode = LazyThreadSafetyMode.SYNCHRONIZED,
+    threadSafetyMode: LazyThreadSafetyMode = defaultThreadSafetyMode,
     provider: () -> T,
   ) {
     backingServiceLocator.put<T>(LazyClassKey(key), threadSafetyMode) { provider() }
   }
 
   public inline fun <reified T : Any> put(
-    threadSafetyMode: LazyThreadSafetyMode = LazyThreadSafetyMode.SYNCHRONIZED,
+    threadSafetyMode: LazyThreadSafetyMode = defaultThreadSafetyMode,
     noinline provider: () -> T,
   ) {
     put(T::class, threadSafetyMode, provider)
@@ -56,10 +73,20 @@ public open class SimpleServiceLocator<out S>(scope: S, allowReregister: Boolean
 
   public inline fun <reified T : Any> getOrNull(): T? = getOrNull(T::class)
 
+
+  /**
+   * Fetches the value previously stored for [key]. If no value was registered for [key], creates a
+   * new entry using [provider] and stores it.
+   *
+   * If [allowedScopes] returns `false` for this [SimpleServiceLocator]'s [scope], the created entry
+   * will come from [onInvalidScope].
+   *
+   * The multi-thread behavior depends on [threadSafetyMode].
+   */
   public fun <T : Any> getOrProvide(
     key: KClass<T>,
     allowedScopes: (S) -> Boolean,
-    threadSafetyMode: LazyThreadSafetyMode = LazyThreadSafetyMode.SYNCHRONIZED,
+    threadSafetyMode: LazyThreadSafetyMode = defaultThreadSafetyMode,
     provider: (S) -> T,
   ): T = backingServiceLocator.getOrProvide(
     LazyClassKey<T>(key),
@@ -69,9 +96,18 @@ public open class SimpleServiceLocator<out S>(scope: S, allowReregister: Boolean
     provider(scope)
   }
 
+  /**
+   * Fetches the value previously stored for [T]'s class. If no value was registered for [T]'s
+   * class, creates a new entry using [provider] and stores it.
+   *
+   * If [allowedScopes] returns `false` for this [SimpleServiceLocator]'s [scope], the created entry
+   * will come from [onInvalidScope].
+   *
+   * The multi-thread behavior depends on [threadSafetyMode].
+   */
   public inline fun <reified T : Any> getOrProvide(
     noinline allowedScopes: (S) -> Boolean,
-    threadSafetyMode: LazyThreadSafetyMode = LazyThreadSafetyMode.SYNCHRONIZED,
+    threadSafetyMode: LazyThreadSafetyMode = defaultThreadSafetyMode,
     noinline provider: (S) -> T,
   ): T = getOrProvide(T::class, allowedScopes, threadSafetyMode, provider)
 

@@ -8,6 +8,7 @@ import com.keyboardr.mapsl.get
 import com.keyboardr.mapsl.getOrProvide
 import com.keyboardr.mapsl.keys.FactoryKey
 import com.keyboardr.mapsl.keys.LazyKey
+import com.keyboardr.mapsl.keys.LazyKey.Companion.defaultLazyKeyThreadSafetyMode
 import com.keyboardr.mapsl.keys.SingletonKey
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
@@ -48,7 +49,7 @@ sealed interface ServiceLocatorScope {
 inline fun <reified T : Any> serviceLocator(
   key: LazyKey<T> = classKey<T>(),
   noinline allowedScopes: (ServiceLocatorScope) -> Boolean = { it is ServiceLocatorScope.ProdScope },
-  threadSafetyMode: LazyThreadSafetyMode = LazyThreadSafetyMode.SYNCHRONIZED,
+  threadSafetyMode: LazyThreadSafetyMode = ProcessServiceLocator.instance.defaultLazyKeyThreadSafetyMode,
   noinline provider: () -> T,
 ): ReadOnlyProperty<Any, T> = object : ReadOnlyProperty<Any, T> {
   override fun getValue(thisRef: Any, property: KProperty<*>): T =

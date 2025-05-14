@@ -1,6 +1,7 @@
 package com.keyboardr.mapsl
 
 import com.keyboardr.mapsl.keys.LazyKey
+import com.keyboardr.mapsl.keys.LazyKey.Companion.defaultLazyKeyThreadSafetyMode
 import com.keyboardr.mapsl.keys.ServiceKey
 import com.keyboardr.mapsl.keys.put
 import kotlin.test.Test
@@ -134,14 +135,17 @@ class ServiceLocatorTest {
     ServiceLocator(allowReregister) {
     var missed = false
 
-    override fun <T : Any, GetParams> onMiss(key: ServiceKey<T, *, GetParams, *>, params: GetParams): T {
+    override fun <T : Any, GetParams> onMiss(
+      key: ServiceKey<T, *, GetParams, *>,
+      params: GetParams
+    ): T {
       missed = true
       return super.onMiss(key, params)
     }
 
     fun <T : Any> getOrProvide(
       key: LazyKey<T>,
-      threadSafetyMode: LazyThreadSafetyMode = LazyKey.PutParams.defaultThreadSafetyMode,
+      threadSafetyMode: LazyThreadSafetyMode = defaultLazyKeyThreadSafetyMode,
       provider: () -> T
     ): T = getValue(
       key,

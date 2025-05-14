@@ -2,6 +2,7 @@ package com.keyboardr.mapsl.keys
 
 import com.keyboardr.mapsl.ServiceLocator
 import com.keyboardr.mapsl.classKey
+import com.keyboardr.mapsl.keys.LazyKey.Companion.defaultLazyKeyThreadSafetyMode
 import kotlin.reflect.KClass
 
 /**
@@ -48,7 +49,7 @@ public data class LazyClassKey<T : Any>(override val type: KClass<T>) : LazyKey<
  * requested for [T]. The multi-thread behavior depends on [threadSafetyMode].
  */
 public inline fun <reified T : Any> ServiceLocator.put(
-  threadSafetyMode: LazyThreadSafetyMode = LazyKey.PutParams.defaultThreadSafetyMode,
+  threadSafetyMode: LazyThreadSafetyMode = defaultLazyKeyThreadSafetyMode,
   noinline provider: () -> T,
 ) {
   put(classKey<T>(), LazyKey.PutParams(provider, threadSafetyMode))

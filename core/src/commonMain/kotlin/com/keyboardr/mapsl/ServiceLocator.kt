@@ -90,6 +90,23 @@ public abstract class ServiceLocator(private val allowReregister: Boolean = fals
   }
 
   /**
+   * Fetches the value previously stored for [key]. If no value was registered for [key], creates a
+   * new entry and stores it.
+   *
+   * This function is internal since users of the library should generally use the `getOrProvide`
+   * from `ScopedServiceLocator`. This is only made available for library components to store
+   * configuration.
+   */
+  internal fun <T : Any, GetParams, PutParams> getOrProvideValue(
+    key: ServiceKey<T, *, GetParams, PutParams>,
+    getParams: GetParams,
+    putParams: () -> PutParams
+  ): T {
+    val entry = getOrProvideEntry(key, { key.createEntry(putParams()) })
+    return getValue(key, getParams, entry)
+  }
+
+  /**
    * Fetches the value from [entry]. This should normally delegate to [key], but some subtypes may
    * perform their own inspection if they create their own [ServiceEntries][ServiceEntry].
    */
