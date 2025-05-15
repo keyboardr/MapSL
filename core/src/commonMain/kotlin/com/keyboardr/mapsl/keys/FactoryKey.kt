@@ -23,5 +23,8 @@ public open class FactoryKey<T : Any>(override val type: KClass<T>) :
   }
 }
 
+/**
+ * A [ServiceKey] which invokes its provider each time a value is requested.
+ */
 @ExperimentalKeyType
 public inline fun <reified T : Any> FactoryKey(): FactoryKey<T> = FactoryKey<T>(T::class)

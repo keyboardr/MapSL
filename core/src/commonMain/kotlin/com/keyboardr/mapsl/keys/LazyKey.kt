@@ -48,6 +48,16 @@ public open class LazyKey<T : Any>(override val type: KClass<T>) :
   }
 
   public companion object {
+    /**
+     * The default [LazyThreadSafetyMode] used for lazy-initialized dependencies
+     * managed by the service locator.
+     *
+     * Defaults to [LazyThreadSafetyMode.SYNCHRONIZED] to ensure thread-safe
+     * initialization by default. This can be changed if a different trade-off
+     * between thread safety and performance is desired for most lazy initializations.
+     *
+     * @see LazyThreadSafetyMode
+     */
     public var ServiceLocator.defaultLazyKeyThreadSafetyMode
       get() = getDefaultParams().threadSafetyMode
       set(value) {
@@ -69,7 +79,7 @@ private fun ServiceLocator.getDefaultParams() =
 
 /**
  * Registers a provider for [key]. [provider] will be invoked the first time a value is
- * requested for [T]. The multi-thread behavior depends on [threadSafetyMode].
+ * requested for [key]. The multi-thread behavior depends on [threadSafetyMode].
  */
 public fun <T : Any> ServiceLocator.put(
   key: LazyKey<T>,

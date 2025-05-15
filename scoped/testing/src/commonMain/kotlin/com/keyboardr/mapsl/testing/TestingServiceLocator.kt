@@ -8,6 +8,15 @@ import com.keyboardr.mapsl.keys.ServiceEntry
 import com.keyboardr.mapsl.keys.ServiceKey
 import kotlin.reflect.KClass
 
+/**
+ * A [ScopedServiceLocator] that provides mocks for testing if no entry is registered for that
+ * service.
+ *
+ * The [scope] should be one that marks the environment as a testing environment.
+ *
+ * Unlike other service locators, it is not an error to register a key more than once in the same
+ * instance. Doing so will overwrite previous entries.
+ */
 public abstract class TestingServiceLocator<S>(scope: S) :
   ScopedServiceLocator<S>(scope, allowReregister = true) {
 
@@ -71,7 +80,7 @@ public abstract class TestingServiceLocator<S>(scope: S) :
    * A [ServiceEntry] whose values are mocks. The mocks should generally be created using
    * [createMock], and may be stored between invocations.
    */
-  public interface MockEntry<T : Any> : ServiceEntry<T> {
+  protected interface MockEntry<T : Any> : ServiceEntry<T> {
     public fun getMock(): T
   }
 }

@@ -34,3 +34,7 @@ kotlin {
   }
   explicitApi()
 }
+
+dokka {
+  moduleName = "simple-testing"
+}

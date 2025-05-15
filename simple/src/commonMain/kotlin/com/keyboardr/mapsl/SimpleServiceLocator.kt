@@ -49,6 +49,11 @@ public open class SimpleServiceLocator<out S>(scope: S, allowReregister: Boolean
       backingServiceLocator.defaultLazyKeyThreadSafetyMode = value
     }
 
+  /**
+   * Registers a provider for [key]. [provider] will be invoked the first time a value is
+   * requested for [key]. The multi-thread behavior depends on [threadSafetyMode]. It is an error to
+   * register a key more than once in the same [SimpleServiceLocator].
+   */
   public fun <T : Any> put(
     key: KClass<T>,
     threadSafetyMode: LazyThreadSafetyMode = defaultThreadSafetyMode,
@@ -57,6 +62,13 @@ public open class SimpleServiceLocator<out S>(scope: S, allowReregister: Boolean
     backingServiceLocator.put<T>(LazyClassKey(key), threadSafetyMode) { provider() }
   }
 
+  /**
+   * Registers a provider for [T]. [provider] will be invoked the first time a value is
+   * requested for [T]. The multi-thread behavior depends on [threadSafetyMode]. It is an error to
+   * register a key more than once in the same [SimpleServiceLocator].
+   *
+   * This is equivalent to calling [put] with `T::class` as the key.
+   */
   public inline fun <reified T : Any> put(
     threadSafetyMode: LazyThreadSafetyMode = defaultThreadSafetyMode,
     noinline provider: () -> T,
@@ -64,13 +76,33 @@ public open class SimpleServiceLocator<out S>(scope: S, allowReregister: Boolean
     put(T::class, threadSafetyMode, provider)
   }
 
+  /**
+   * Fetches an item for [key]. If the [key] was not previously registered, returns the result of
+   * [SimpleServiceLocator.onMiss].
+   */
   public fun <T : Any> get(key: KClass<T>): T = backingServiceLocator.get(LazyClassKey(key))
 
+  /**
+   * Fetches an item for [T]. If the [T] was not previously registered, returns the result of
+   * [SimpleServiceLocator.onMiss].
+   *
+   * This is equivalent to calling [get] with `T::class` as the key.
+   */
   public inline fun <reified T : Any> get(): T = get(T::class)
 
+  /**
+   * Fetches the item for [key]. If the [key] was not previously registered, returns `null`. Does
+   * not invoke [ServiceLocator.onMiss].
+   */
   public fun <T : Any> getOrNull(key: KClass<T>): T? =
     backingServiceLocator.getOrNull(LazyClassKey(key))
 
+  /**
+   * Fetches the item for [T]. If the [T] was not previously registered, returns `null`. Does
+   * not invoke [ServiceLocator.onMiss].
+   *
+   * This is equivalent to calling [get] with `T::class` as the key.
+   */
   public inline fun <reified T : Any> getOrNull(): T? = getOrNull(T::class)
 
 
@@ -104,6 +136,8 @@ public open class SimpleServiceLocator<out S>(scope: S, allowReregister: Boolean
    * will come from [onInvalidScope].
    *
    * The multi-thread behavior depends on [threadSafetyMode].
+   *
+   * This is equivalent to calling [getOrProvide] with `T::class` as the key.
    */
   public inline fun <reified T : Any> getOrProvide(
     noinline allowedScopes: (S) -> Boolean,
