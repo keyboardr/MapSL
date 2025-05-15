@@ -10,46 +10,8 @@ processing or code generation.
 At its core, MapSL is driven by a heterogeneous map. Keys maintain a record of what type of values
 they reference, and storage and retrieval of values is ensured to be of that type.
 
-### Service Locator vs Dependency Injection
-
-MapSL is designed as a Service Locator, an architectural pattern that provides a central registry of
-services available to an application. While Service Locators and Dependency Injection (DI)
-frameworks both address the problem of managing dependencies, they do so through different
-mechanisms. DI frameworks typically invert control, injecting dependencies into components rather
-than the component explicitly requesting them. This often involves complex setup using annotations,
-code generation, or extensive configuration. MapSL, on the other hand, allows components to
-explicitly request their dependencies from the service locator. This approach simplifies the setup
-process, makes the flow of dependencies more explicit within the code, and avoids the need for
-external tools like annotation processors, leading to a faster build times and a shallower learning
-curve compared to many DI solutions. MapSL aims to strike a balance, offering the ease of use and
-explicitness of a Service Locator while still providing the benefits of centralized dependency
-management often associated with DI.
-
-#### Main drawbacks compared to DI (and how MapSL addresses them)
-
-- A class's dependencies are not immediately obvious from its constructor. This is intrinsic to any
-  Service Locator approach, and MapSL doesn't fundamentally alter this. However, there are other
-  places where a class's dependencies are listed (e.g imports or module dependencies), and these are
-  often sufficient for identifying what a class depends on. More commonly, however, it is important
-  for consumers of a class to know how to obtain an instance. The patterns recommended by MapSL make
-  this clear and explicit.
-    - If a clear list of dependencies is still desired, your team can establish a best practice of
-      only accessing the `instance` properties from the default arguments of a constructor. This
-      would provide some of the same benefits as constructor-based dependency injection without
-      exposing transitive dependencies.
-- Service Locators often make testing difficult by relying on global state. MapSL addresses this by
-  allowing the top-level ServiceLocator to be swapped out for a test instance that is already
-  configured with your project's common fakes, and provides mocks when no fake has been registered.
-  Additionally, smaller scoped ServiceLocators may be passed in to classes as needed, resulting in a
-  hybrid approach (hierarchical `ServiceLocators` are possible, which would help here. These would
-  behave similarly to Context objects. See [Future Plans](#future-plans))).
-- Service Locators sometimes suffer from a lack of runtime safety due to separation between the
-  declaration and the resolution of dependencies. The [late registration](#late-registration)
-  significantly reduces this risk. It is still possible to fail resolution
-  with [Pre-registration](#pre-registration), but the best practice of coupling the `put()` and the
-  `get()` functions in the same commit mitigates this. Both approaches can still potentially run
-  into problems with circular dependencies when using lazy keys, but these are rare in practice (and
-  are mitigated in build systems that prefer tightly scoped modules, e.g. Bazel).
+## Declaring dependencies
+MapSL is not yet available on Maven Central, but will be once its initial API is stable.
 
 ## Multiplatform
 
@@ -74,7 +36,7 @@ MapSL consists of the following library modules:
   for the simplified API.
 
 If you're just getting started with MapSL, it is recommended to start with the `simple` module for
-production and `simple.testing` in your tests.
+production and `simple.testing` in your tests. See [Simple setup](#simple-setup).
 
 ## Core concepts
 
@@ -86,20 +48,20 @@ example, the `Entry` for a `LazyKey` waits to instantiate its value until it has
 while the `Entry` for a `SingletonKey` is initialized with its value already instantiated.
 
 > [!NOTE]
-> A word about terminology: in this documentation a key's "kind" will refer to the class of the key
-> itself and the behavior its entries have. A key's "type" will refer to the type of values its
-> entry
-> produces/stores.
+> In this documentation a key's "kind" will refer to the class of the key itself and the behavior
+> its entries have.
+> 
+> A key's "type" will refer to the type of values its entry produces/stores.
 
 #### Included key kinds
 
-| Key Kind                         | Value creation                                                                                          | Value lifetime                                   | Key equivalence    | GetParams      | Main PutParams   |
-|----------------------------------|---------------------------------------------------------------------------------------------------------|--------------------------------------------------|--------------------|----------------|------------------|
-| `LazyKey<T>`                     | Created the first time it is requested                                                                  | Stored indefinitely                              | Key instance       | -              | `() -> T`        |
-| `SingletonKey<T>`                | Stored when key is registered                                                                           | Stored indefinitely                              | Key instance       | -              | `T`              |
-| `ClassKey<T>`                    | `Lazy` or `Singleton`                                                                                   | Stored indefinitely                              | Same reifiable `T` | -              | `() -> T` or `T` |
-| `FactoryKey<T>` (experimental)   | New value for every request                                                                             | Not stored                                       | Key instance       | -              | `() -> T`        |
-| `LifecycleKey<T>` (experimental) | Created the first time it is requested and the first time after all its requests' lifecycles have ended | Stored until all requests' lifecycles have ended | Key instance       | LifecycleOwner | `() -> T`        |
+| Key Kind                         | Value creation                                                                                          | Value lifetime                                   | Key equivalence    |   GetParams    |  Main PutParams  |
+|----------------------------------|---------------------------------------------------------------------------------------------------------|--------------------------------------------------|--------------------|:--------------:|:----------------:|
+| `LazyKey<T>`                     | Created the first time it is requested                                                                  | Stored indefinitely                              | Key instance       |       -        |    `() -> T`     |
+| `SingletonKey<T>`                | Stored when key is registered                                                                           | Stored indefinitely                              | Key instance       |       -        |       `T`        |
+| `ClassKey<T>`                    | `Lazy` or `Singleton`                                                                                   | Stored indefinitely                              | Same reifiable `T` |       -        | `() -> T` or `T` |
+| `FactoryKey<T>` (experimental)   | New value for every request                                                                             | Not stored                                       | Key instance       |       -        |    `() -> T`     |
+| `LifecycleKey<T>` (experimental) | Created the first time it is requested and the first time after all its requests' lifecycles have ended | Stored until all requests' lifecycles have ended | Key instance       | LifecycleOwner |    `() -> T`     |
 
 #### GetParams and PutParams
 
@@ -315,6 +277,47 @@ The following sample projects are provided:
   `SimpleServiceLocator` across a desktop and Android application, with a shared library between
   them.
 - [Key sample](samples/keysample): Shows how the various keys in `core` and `lifecycle` can be used.
+
+## Service Locator vs Dependency Injection
+
+MapSL is designed as a Service Locator, an architectural pattern that provides a central registry of
+services available to an application. While Service Locators and Dependency Injection (DI)
+frameworks both address the problem of managing dependencies, they do so through different
+mechanisms. DI frameworks typically invert control, injecting dependencies into components rather
+than the component explicitly requesting them. This often involves complex setup using annotations,
+code generation, or extensive configuration. MapSL, on the other hand, allows components to
+explicitly request their dependencies from the service locator. This approach simplifies the setup
+process, makes the flow of dependencies more explicit within the code, and avoids the need for
+external tools like annotation processors, leading to a faster build times and a shallower learning
+curve compared to many DI solutions. MapSL aims to strike a balance, offering the ease of use and
+explicitness of a Service Locator while still providing the benefits of centralized dependency
+management often associated with DI.
+
+### Main drawbacks compared to DI (and how MapSL addresses them)
+
+- A class's dependencies are not immediately obvious from its constructor. This is intrinsic to any
+  Service Locator approach, and MapSL doesn't fundamentally alter this. However, there are other
+  places where a class's dependencies are listed (e.g imports or module dependencies), and these are
+  often sufficient for identifying what a class depends on. More commonly, however, it is important
+  for consumers of a class to know how to obtain an instance. The patterns recommended by MapSL make
+  this clear and explicit.
+    - If a clear list of dependencies is still desired, your team can establish a best practice of
+      only accessing the `instance` properties from the default arguments of a constructor. This
+      would provide some of the same benefits as constructor-based dependency injection without
+      exposing transitive dependencies.
+- Service Locators often make testing difficult by relying on global state. MapSL addresses this by
+  allowing the top-level ServiceLocator to be swapped out for a test instance that is already
+  configured with your project's common fakes, and provides mocks when no fake has been registered.
+  Additionally, smaller scoped ServiceLocators may be passed in to classes as needed, resulting in a
+  hybrid approach (hierarchical `ServiceLocators` are possible, which would help here. These would
+  behave similarly to Context objects. See [Future Plans](#future-plans))).
+- Service Locators sometimes suffer from a lack of runtime safety due to separation between the
+  declaration and the resolution of dependencies. The [late registration](#late-registration)
+  significantly reduces this risk. It is still possible to fail resolution
+  with [Pre-registration](#pre-registration), but the best practice of coupling the `put()` and the
+  `get()` functions in the same commit mitigates this. Both approaches can still potentially run
+  into problems with circular dependencies when using lazy keys, but these are rare in practice (and
+  are mitigated in build systems that prefer tightly scoped modules, e.g. Bazel).
 
 ## Contributing
 
