@@ -264,6 +264,10 @@ the service the first time it is requested. It is common practice to create a pr
 encapsulate this behavior.
 See [this example](samples/basic/src/main/java/com/keyboardr/mapsl/sample/basic/ServiceLocatorDelegate.kt).
 
+Alternatively you can use interface delegation to reduce the amount of boilerplate further, but this
+approach is a little less flexible and intuitive.
+See [this example](samples/multimodule/shared/src/commonMain/kotlin/com/keyboardr/mapsl/sample/multimodule/services/BarManager.kt).
+
 ##### Type specification
 
 When calling `SimpleServiceLocator`'s `put()`, `get()`, and `getOrProvide()` functions, it is
