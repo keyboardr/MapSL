@@ -79,7 +79,21 @@ class FactoryKeyTest {
     repeat(valueCount) { values += serviceLocator.get(key) }
 
     assertContentEquals((0..<valueCount).toList(), values)
+  }
 
+  @Test
+  fun getWithParams_returnNewInvocationEachTime() {
+    val key = FactoryKey<Int, Int>()
+    var currentValue = 0
+    val valueCount = 5
+    val serviceLocator = TestServiceLocator()
+
+    serviceLocator.put(key) { it + 1 }
+
+    var values = mutableListOf<Int>()
+    repeat(valueCount) { values += serviceLocator.get(key, currentValue++) }
+
+    assertContentEquals((1..<(valueCount + 1)).toList(), values)
   }
 
   private class TestServiceLocator : ServiceLocator() {

@@ -62,4 +62,8 @@ inline fun <reified T : Any> serviceLocator(
 }
 
 @OptIn(ExperimentalKeyType::class)
-fun <T : Any> FactoryKey<T>.create(): T = ProcessServiceLocator.instance.get(this)
+fun <T : Any, GetParams> FactoryKey<T, GetParams>.create(params: GetParams): T =
+  ProcessServiceLocator.instance.get(this, params)
+
+@OptIn(ExperimentalKeyType::class)
+fun <T : Any> FactoryKey<T, Unit>.create(): T = ProcessServiceLocator.instance.get(this)
