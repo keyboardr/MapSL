@@ -18,7 +18,7 @@ The key benefits of using MapSL's `simple` module include:
 - **No Code Generation:** Avoids build-time overhead and complexity associated with annotation
   processors.
 - **Testability:** Provides built-in support for swapping out dependencies in tests.
-- **Easy migration:** Built on top of `core` and `scoped`, so migration is easy if more power is
+- **Easy migration:** Built on top of the `core` and `scoped` modules, so migration is easy if more power or flexibility is
   needed (see [Migration](migration.md)).
 
 ## 1. Add Dependencies
