@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import com.keyboardr.mapsl.sample.multimodule.services.BarManager
 import com.keyboardr.mapsl.sample.multimodule.services.BazManager
 import com.keyboardr.mapsl.sample.multimodule.services.FooManager
+import com.keyboardr.mapsl.sample.multimodule.services.PlatformSpecificService
 
 @Composable
 fun MainScreen(modifier: Modifier = Modifier) {
@@ -15,5 +16,8 @@ fun MainScreen(modifier: Modifier = Modifier) {
     Text(FooManager.instance.sayHello())
     Text(BarManager.instance.sayHello())
     Text(BazManager.instance.sayHello())
+    Text(PlatformSpecificService.instance.sayHello())
+    Text(PlatformSpecificService.instance.sayHelloCommon())
+    Text("End of common")
   }
 }

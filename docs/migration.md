@@ -42,7 +42,16 @@ register multiple entries for the same service type.
 
 ## Determining If Migration Is Necessary
 
-For many projects, the `simple` module is sufficient and requires much less configuration. If the
+| Use Case                            | SimpleServiceLocator                         | ScopedServiceLocator |
+|-------------------------------------|----------------------------------------------|----------------------|
+| Lazy initialization                 | Supported                                    | Supported            |
+| Pre registration                    | Supported                                    | Supported            |
+| Eager initialization                | Not directly supported, workaround available | Supported            |
+| Multiple instances per service type | Not directly supported, workaround available | Supported            |
+| Factory patterns                    | Not directly supported, workaround available | Experimental support |
+| Lifecycle scoping                   | Not supported, can be manually implemented   | Experimental support |
+
+For many projects, the `simple` module is sufficient and requires less configuration. If the
 advanced functionality available in `core` is desired, but only in a few places, here are some
 strategies to avoid migration:
 
@@ -98,16 +107,16 @@ If you haven't already, add the `core` and `scoped` module dependencies to your 
 ```kotlin
 // build.gradle (Kotlin DSL example)
 dependencies {
-    // Keep simple for now
-    implementation("com.keyboardr.mapsl:simple:<version>")
-    testImplementation("com.keyboardr.mapsl:simple-testing:<version>")
+  // Keep simple for now
+  implementation("com.keyboardr.mapsl:simple:<version>")
+  testImplementation("com.keyboardr.mapsl:simple-testing:<version>")
 
-    // Add core and scoped
-    implementation("com.keyboardr.mapsl:core:<version>")
-    implementation("com.keyboardr.mapsl:scoped:<version>")
-    testImplementation("com.keyboardr.mapsl:scoped-testing:<version>")
-    // Add other core modules if needed (e.g., lifecycle)
-    // implementation("com.keyboardr.mapsl:lifecycle:<version>")
+  // Add core and scoped
+  implementation("com.keyboardr.mapsl:core:<version>")
+  implementation("com.keyboardr.mapsl:scoped:<version>")
+  testImplementation("com.keyboardr.mapsl:scoped-testing:<version>")
+  // Add other core modules if needed (e.g., lifecycle)
+  // implementation("com.keyboardr.mapsl:lifecycle:<version>")
 }
 ```
 
@@ -119,27 +128,27 @@ Modify your `ProcessServiceLocator` singleton to hold a `ScopedServiceLocator` i
 ```kotlin
 // Before (using simple)
 object ProcessServiceLocator {
-    // SimpleServiceLocator also supports scoping
-    private lateinit var serviceLocator: SimpleServiceLocator<ServiceLocatorScope>
+  // SimpleServiceLocator also supports scoping
+  private lateinit var instance: SimpleServiceLocator<ServiceLocatorScope>
 
-    fun register(locator: SimpleServiceLocator<ServiceLocatorScope>, /* ... */) {
-        serviceLocator = locator
-        // ...
-    }
+  fun register(locator: SimpleServiceLocator<ServiceLocatorScope> /* ... */) {
+    instance = locator
+    // ...
+  }
 }
 
 // After (using core)
 object ProcessServiceLocator {
-    // Change type to ScopedServiceLocator, using the same scope type
-    private lateinit var serviceLocator: ScopedServiceLocator<ServiceLocatorScope>
+  // Change type to ScopedServiceLocator, using the same scope type
+  private lateinit var instance: ScopedServiceLocator<ServiceLocatorScope>
 
-    // Change type in register function
-    fun register(locator: ScopedServiceLocator<ServiceLocatorScope>, /* ... */) {
-        serviceLocator = locator
-        // ...
-    }
+  // Change type in register function
+  fun register(locator: ScopedServiceLocator<ServiceLocatorScope> /* ... */) {
+    instance = locator
+    // ...
+  }
 
-    // ... get/getOrProvide delegates (will need updates if delegates use the locator type directly)
+  // ... get/getOrProvide delegates (will need updates if delegates use the locator type directly)
 }
 ```
 
@@ -174,12 +183,12 @@ extension function from the `com.keyboardr.mapsl.keys` package.
 
 // Inside your registration lambda (syntax is the same as before)
 ProcessServiceLocator.register(ScopedServiceLocator(ProductionScope), /* ... */) { // Updated locator type
-    put<MyService> { MyServiceImpl() } // Explicitly specify type
-    // ...
+  put<MyService> { MyServiceImpl() }
+  // ... other registrations
 }
 ```
 
-### Step 4: Update Test Service Locators
+### Step 4: Update Test ServiceLocators
 
 If you were using `SimpleTestingServiceLocator`, you will likely need to switch to
 `ScopedTestingServiceLocator` from the `scoped.testing` module. Update your test setup to create and
@@ -187,13 +196,15 @@ register this new testing locator, ensuring it uses the same scope type.
 
 ```kotlin
 // Before (using simple testing)
-object TestServiceLocator : SimpleTestingServiceLocator<ServiceLocatorScope>(ServiceLocatorScope.Testing) {
-    // ... createMock implementation
+object TestServiceLocator :
+  SimpleTestingServiceLocator<ServiceLocatorScope>(ServiceLocatorScope.Testing) {
+  // ... createMock implementation
 }
 
 // After (using scoped testing)
-object TestServiceLocator : ScopedTestingServiceLocator<ServiceLocatorScope>(ServiceLocatorScope.Testing) {
-    // ... createMock implementation
+object TestServiceLocator :
+  ScopedTestingServiceLocator<ServiceLocatorScope>(ServiceLocatorScope.Testing) {
+  // ... createMock implementation
 }
 ```
 
@@ -206,12 +217,12 @@ Update test registrations to use the implicit `ClassKey` extensions on the
 
 // Before (test setup - implicit ClassKey)
 TestServiceLocator.register(/* ... */) {
-    put<MyService>(FakeMyService())
+  put<MyService>(FakeMyService())
 }
 
 // After (test setup - using implicit ClassKey extensions)
 TestServiceLocator.register(/* ... */) {
-    put<MyService>(FakeMyService())
+  put<MyService>(FakeMyService())
 }
 ```
 
@@ -234,7 +245,8 @@ class MyService {
 
 class AnotherService {
   companion object {
-    val instance = ProcessServiceLocator.instance.getOrProvide<AnotherService> { AnotherServiceImpl() }
+    val instance =
+      ProcessServiceLocator.instance.getOrProvide<AnotherService> { AnotherServiceImpl() }
   }
 }
 ```
@@ -256,9 +268,10 @@ and fakes are being provided correctly via the `ScopedTestingServiceLocator`.
 ## Using Different Key Types in the Core Module
 
 Once you have migrated to using `ScopedServiceLocator` from the `core`/`scoped` modules, you gain
-the ability to use different `Key` types beyond the implicit `Lazy ClassKey` and
+the ability to use different `Key` kinds beyond the implicit `Lazy ClassKey` and
 `Singleton ClassKey`. This is necessary when you need specific behaviors like eager initialization,
-factory patterns, or lifecycle management.
+factory patterns, or lifecycle management. For more detail on the key kinds provided by MapSL (and
+how to build your own), see [Key Kinds](keys.md).
 
 To use a different key type, you must:
 
