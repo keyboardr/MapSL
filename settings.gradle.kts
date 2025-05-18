@@ -25,11 +25,14 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "MapSL"
+includeBuild("build-conventions")
 include(":core")
 include(":docs")
 include(":lifecycle")
 include(":scoped", ":scoped:testing")
+project(":scoped:testing").name = "scoped-testing"
 include(":simple", ":simple:testing")
+project(":simple:testing").name = "simple-testing"
 include(":samples:basic")
 include(":samples:keysample")
 include(

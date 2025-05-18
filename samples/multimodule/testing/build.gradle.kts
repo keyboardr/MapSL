@@ -23,7 +23,7 @@ kotlin {
 
   sourceSets {
     commonMain.dependencies {
-      api(projects.simple.testing)
+      api(projects.simple.simpleTesting)
       api(projects.samples.multimodule.shared)
       implementation(libs.androidx.annotation)
       implementation(libs.mockito.kotlin)

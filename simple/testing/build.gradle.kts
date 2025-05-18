@@ -2,7 +2,7 @@ import com.keyboardr.build.jdkVersion
 
 plugins {
   alias(libs.plugins.kotlin.multiplatform)
-  alias(libs.plugins.dokka)
+  id("mapsl.publishable")
 }
 
 kotlin {

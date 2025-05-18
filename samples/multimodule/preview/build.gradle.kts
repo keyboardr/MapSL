@@ -34,7 +34,7 @@ kotlin {
 
 dependencies {
   implementation(projects.samples.multimodule.shared)
-  implementation(projects.simple.testing)
+  implementation(projects.simple.simpleTesting)
 
   implementation(platform(libs.androidx.compose.bom))
   implementation(libs.androidx.ui)

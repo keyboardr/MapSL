@@ -56,7 +56,7 @@ dependencies {
   debugImplementation(libs.androidx.ui.tooling)
   debugImplementation(libs.androidx.ui.test.manifest)
 
-  testImplementation(projects.simple.testing)
+  testImplementation(projects.simple.simpleTesting)
   testImplementation(libs.kotlin.test)
   testImplementation(libs.androidx.test)
   testImplementation(libs.androidx.test.junit)

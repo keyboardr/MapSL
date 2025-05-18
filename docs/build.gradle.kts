@@ -1,5 +1,5 @@
 plugins {
-  alias(libs.plugins.dokka)
+  id("mapsl.documentable")
 }
 
 dokka {
@@ -10,7 +10,7 @@ dependencies {
   dokka(projects.core)
   dokka(projects.lifecycle)
   dokka(projects.scoped)
-  dokka(projects.scoped.testing)
+  dokka(projects.scoped.scopedTesting)
   dokka(projects.simple)
-  dokka(projects.simple.testing)
+  dokka(projects.simple.simpleTesting)
 }
