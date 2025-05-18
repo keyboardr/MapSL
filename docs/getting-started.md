@@ -44,8 +44,6 @@ dependencies {
 }
 ```
 
-Replace `<latest_version>` with the current latest version of MapSL.
-
 ## 2. Understand `SimpleServiceLocator` and Class Keys
 
 The central component in the `simple` module is `SimpleServiceLocator<S>`. You create an instance of
@@ -53,7 +51,7 @@ this class to hold and manage your services. The `<S>` type parameter allows you
 service locator instance with a specific **Scope**, which can be useful for distinguishing between
 different parts or environments of your application (like production vs. testing).
 
-In `SimpleServiceLocator`, you don't typically create explicit key objects. Instead, the library
+In `SimpleServiceLocator`, you don't create explicit key objects. Instead, the library
 uses the **`KClass<T>` of the service type (`T`)** as the implicit key. This means you interact with
 the locator using the service's class directly in generic functions like `put<MyService>` or
 `get<UserRepository>`.
