@@ -6,7 +6,7 @@ import com.keyboardr.mapsl.keys.put
 import com.keyboardr.mapsl.lifecycle.put
 import com.keyboardr.mapsl.sample.keysample.domain.lifecycle.LifecycleScopedManager
 import com.keyboardr.mapsl.sample.keysample.domain.single.PreregisteredSingleton
-import com.keyboardr.mapsl.sample.keysample.locator.ProcessServiceLocator
+import com.keyboardr.mapsl.sample.keysample.locator.MainServiceLocator
 import com.keyboardr.mapsl.sample.keysample.locator.ServiceLocatorScope
 import com.keyboardr.mapsl.testing.TestingServiceLocator
 import org.mockito.Mockito.mock
@@ -18,7 +18,7 @@ object TestServiceLocator :
   override fun <T : Any> createMock(clazz: KClass<T>): T = mock<T>(clazz.java)
 
   fun register() {
-    ProcessServiceLocator.register(this, ApplicationProvider.getApplicationContext()) {
+    MainServiceLocator.register(this, ApplicationProvider.getApplicationContext()) {
       // common fakes go here
       put<PreregisteredSingleton>(PreregisteredSingleton("preregisteredTesting"))
       @OptIn(ExperimentalKeyType::class, ExperimentalTime::class)

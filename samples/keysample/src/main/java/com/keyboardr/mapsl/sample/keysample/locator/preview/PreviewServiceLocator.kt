@@ -11,7 +11,7 @@ import com.keyboardr.mapsl.sample.keysample.domain.factory.FactoryProduced
 import com.keyboardr.mapsl.sample.keysample.domain.lifecycle.LifecycleScopedManager
 import com.keyboardr.mapsl.sample.keysample.domain.single.LazyPreregisteredSingleton
 import com.keyboardr.mapsl.sample.keysample.domain.single.PreregisteredSingleton
-import com.keyboardr.mapsl.sample.keysample.locator.ProcessServiceLocator
+import com.keyboardr.mapsl.sample.keysample.locator.MainServiceLocator
 import com.keyboardr.mapsl.sample.keysample.locator.ServiceLocatorScope
 import kotlin.time.ExperimentalTime
 
@@ -43,6 +43,6 @@ private var hasRegisteredPreviewLocator = false
 @Composable
 fun EnsurePreviewLocator() {
   if (!hasRegisteredPreviewLocator) {
-    ProcessServiceLocator.register(PreviewServiceLocator, LocalContext.current.applicationContext)
+    MainServiceLocator.register(PreviewServiceLocator, LocalContext.current.applicationContext)
   }
 }

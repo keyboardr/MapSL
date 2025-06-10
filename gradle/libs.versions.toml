@@ -1,6 +1,6 @@
 [versions]
 android-compileSdk = "36"
-android-targetSdk = "36"
+android-targetSdk = "35"
 android-minSdk = "24"
 
 agp = "8.9.2"
@@ -20,6 +20,7 @@ androidx-annotation = { group = "androidx.annotation", name = "annotation", vers
 androidx-core = { group = "androidx.core", name = "core-ktx", version.ref = "androidx-core" }
 androidx-lifecycle = { group = "androidx.lifecycle", name = "lifecycle-common", version.ref = "androidx-lifetime" }
 androidx-lifecycle-runtime = { group = "androidx.lifecycle", name = "lifecycle-runtime", version.ref = "androidx-lifetime" }
+androidx-startup = { group = "androidx.startup", name = "startup-runtime", version = "1.2.0" }
 
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version = "0.6.2" }
 
@@ -39,7 +40,7 @@ androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-man
 kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.ref = "kotlin" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
 mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version = "5.4.0" }
-robolectric = { group = "org.robolectric", name = "robolectric", version = "4.13" }
+robolectric = { group = "org.robolectric", name = "robolectric", version = "4.14.1" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

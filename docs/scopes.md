@@ -68,27 +68,27 @@ The primary way scopes influence behavior in the `simple` module is through the
        tests this may create a mock instead.
 
 ```kotlin
-// Assuming ProcessServiceLocator.kt with the serviceLocator delegate is available
+// Assuming MainServiceLocator.kt with the serviceLocator delegate is available
 // (as shown in the Getting Started guide)
 
 // Delegate for lazy service access using getOrProvide,
 // with an allowedScopes predicate.
 inline fun <reified T : Any> serviceLocator(
   noinline allowedScopes: (ServiceLocatorScope) -> Boolean = { true }, // Predicate using your scope type
-  threadSafetyMode: LazyThreadSafetyMode = ProcessServiceLocator.instance.defaultThreadSafetyMode,
+  threadSafetyMode: LazyThreadSafetyMode = MainServiceLocator.instance.defaultThreadSafetyMode,
   noinline provider: (ServiceLocatorScope) -> T, // Provider receives the scope
 ): ReadOnlyProperty<Any, T> = object : ReadOnlyProperty<Any, T> {
   override fun getValue(thisRef: Any, property: KProperty<*>): T =
-    ProcessServiceLocator.instance.getOrProvide(
+    MainServiceLocator.instance.getOrProvide(
       allowedScopes,
       threadSafetyMode,
       provider
     )
 }
 
-// Assuming ProcessServiceLocator and ServiceLocatorScope enum as defined in Getting Started
+// Assuming MainServiceLocator and ServiceLocatorScope enum as defined in Getting Started
 enum class ServiceLocatorScope { Production, Testing }
-object ProcessServiceLocator { // ... instance and register function ... }
+object MainServiceLocator { // ... instance and register function ... }
 ```
 
 ## Simple Example: Production vs. Testing Scopes
@@ -100,7 +100,7 @@ code and another for tests.
 // 1. Define your simple enum scope
 enum class AppEnvironment { Production, Testing }
 
-// 2. Set up your ProcessServiceLocator (similar to the Getting Started guide)
+// 2. Set up your MainServiceLocator (similar to the Getting Started guide)
 object AppServiceLocator {
   lateinit var instance: SimpleServiceLocator<AppEnvironment>
     private set
@@ -212,8 +212,8 @@ sealed interface AppServiceScope {
   object Testing : AppServiceScope // Dedicated testing scope
 }
 
-// 2. Set up your ProcessServiceLocator with the sealed interface scope type
-object MultiProcessServiceLocator {
+// 2. Set up your MainServiceLocator with the sealed interface scope type
+object MultiMainServiceLocator {
   lateinit var instance: SimpleServiceLocator<AppServiceScope>
     private set
 
@@ -230,11 +230,11 @@ object MultiProcessServiceLocator {
 // Delegate using AppServiceScope for the scope type
 inline fun <reified T : Any> serviceLocator(
   noinline allowedScopes: (AppServiceScope) -> Boolean = { it is AppServiceScope.ProductionScope }, // Default: Any ProductionScope
-  threadSafetyMode: LazyThreadSafetyMode = MultiProcessServiceLocator.instance.defaultThreadSafetyMode,
+  threadSafetyMode: LazyThreadSafetyMode = MultiMainServiceLocator.instance.defaultThreadSafetyMode,
   noinline provider: (AppServiceScope) -> T
 ): ReadOnlyProperty<Any, T> =
   ReadOnlyProperty { _: Any, _: T ->
-    MultiProcessServiceLocator.instance.getOrProvide(
+    MultiMainServiceLocator.instance.getOrProvide(
       allowedScopes,
       threadSafetyMode,
       provider
@@ -244,7 +244,7 @@ inline fun <reified T : Any> serviceLocator(
 // 3. Initialize in Different Processes
 // In your Main Process entry point:
 fun startMainProcess(context: Any) {
-  MultiProcessServiceLocator.register(
+  MultiMainServiceLocator.register(
     SimpleServiceLocator(AppServiceScope.Process("main")),
     context
   )
@@ -252,7 +252,7 @@ fun startMainProcess(context: Any) {
 
 // In your Sync Service Process entry point:
 fun startSyncProcess(context: Any) {
-  MultiProcessServiceLocator.register(
+  MultiMainServiceLocator.register(
     SimpleServiceLocator(AppServiceScope.Process("sync_service")),
     context
   )
@@ -298,7 +298,7 @@ fun main() {
   // Output: "echo(:sync_service) - DEBUG: Hello, prod!"
 
   // Testing flow (conceptually in a test)
-  MultiProcessServiceLocator.register(
+  MultiMainServiceLocator.register(
     TestServiceLocator(AppServiceScope.Testing),
     Any()
   ) // Assuming TestServiceLocator exists

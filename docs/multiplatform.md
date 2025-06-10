@@ -83,7 +83,7 @@ multiplatform module.
 
 ## 2. Set up a Shared Service Locator
 
-Define your main `ServiceLocator` singleton (like `ProcessServiceLocator`) and your
+Define your main `ServiceLocator` singleton (like `MainServiceLocator`) and your
 `ServiceLocatorScope` in `commonMain`. This object will be the central access point for services
 across all platforms.
 

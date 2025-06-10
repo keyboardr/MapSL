@@ -33,11 +33,13 @@ MapSL consists of the following library modules:
 - `scoped.testing` - Provides a `ScopedServiceLocator` subclass suitable for use in tests, offering
   features like mock creation for unregistered keys.
 - `simple` - Provides a more streamlined, but less powerful API for covering the common cases.
+- `simple.scaffold` - Includes a basic `MainServiceLocator` when detailed scoping is not required.
 - `simple.testing` - Similar to `scoped.testing`, but based on `simple`, offering testing utilities
   for the simplified API.
 
-If you're just getting started with MapSL, it is recommended to start with the `simple` module for
-production and `simple.testing` in your tests. See [Simple setup](#simple-setup).
+If you're just getting started with MapSL, it is recommended to start with the `simple` or
+`simple-scaffold` module for production and `simple.testing` in your tests.
+See [Simple setup](#simple-setup).
 
 ## Core concepts
 
@@ -97,9 +99,13 @@ module provides a streamlined API centered around the `SimpleServiceLocator`. In
 under the hood. Scoping is included in `SimpleServiceLocator`, as it is typically used as a
 top-level, application-wide component.
 
+In the case where multiple scopes are not needed (e.g. a single-module Android app), the
+`simple-scaffold` module provides a preconfigured `MainServiceLocator`. On Android, this is also
+initialized automatically on app startup. See [Scaffold](./docs/scaffold.md) for more details.
+
 The typical architecture involves:
 
-1. A central application-wide `ProcessServiceLocator` singleton instance, often a
+1. A central application-wide `MainServiceLocator` singleton instance, often a
    `SimpleServiceLocator` configured with an appropriate environment [scope](#scopes).
 2. Services are primarily accessed using property delegates (like `by serviceLocator { ... }`) in
    their companion objects. This pattern leverages `SimpleServiceLocator.getOrProvide()` to lazily

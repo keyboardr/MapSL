@@ -2,6 +2,7 @@ package com.keyboardr.mapsl.sample.basic
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.keyboardr.mapsl.sample.basic.testing.TestServiceLocator
+import junit.framework.TestCase.assertFalse
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -22,5 +23,16 @@ class ExampleTest {
 
     assertTrue(mockingDetails(myService).isMock)
     assertSame(myService, MyService.instance)
+  }
+
+  @Test
+  fun registered_returnsSameInstance() {
+    val instance = MyService()
+    TestServiceLocator.put<MyService> { instance }
+
+    val myService = MyService.instance
+
+    assertFalse(mockingDetails(myService).isMock)
+    assertSame(myService, instance)
   }
 }

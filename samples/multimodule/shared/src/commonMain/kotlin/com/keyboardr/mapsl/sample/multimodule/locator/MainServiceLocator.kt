@@ -5,7 +5,7 @@ import com.keyboardr.mapsl.sample.multimodule.platform.PlatformContext
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
-object ProcessServiceLocator {
+object MainServiceLocator {
   lateinit var instance: SimpleServiceLocator<ServiceLocatorScope>
     private set
 
@@ -15,7 +15,7 @@ object ProcessServiceLocator {
     registrationBlock: SimpleServiceLocator<ServiceLocatorScope>.() -> Unit = {},
   ) {
     if (serviceLocator.scope is ServiceLocatorScope.ProdScope) {
-      check(!::instance.isInitialized) { "ProcessServiceLocator is already initialized" }
+      check(!::instance.isInitialized) { "MainServiceLocator is already initialized" }
     }
     instance = serviceLocator.apply {
       put<PlatformContext> { applicationContext }
@@ -37,16 +37,16 @@ sealed interface ServiceLocatorScope {
 
 
 /**
- * A property delegate to access a service stored in [ProcessServiceLocator] using
+ * A property delegate to access a service stored in [MainServiceLocator] using
  * [SimpleServiceLocator.getOrProvide].
  */
 inline fun <reified T : Any> serviceLocator(
   noinline allowedScopes: (ServiceLocatorScope) -> Boolean = { it is ServiceLocatorScope.ProdScope },
-  threadSafetyMode: LazyThreadSafetyMode = ProcessServiceLocator.instance.defaultThreadSafetyMode,
+  threadSafetyMode: LazyThreadSafetyMode = MainServiceLocator.instance.defaultThreadSafetyMode,
   noinline provider: (ServiceLocatorScope) -> T,
 ): ReadOnlyProperty<Any, T> = object : ReadOnlyProperty<Any, T> {
   override fun getValue(thisRef: Any, property: KProperty<*>): T =
-    ProcessServiceLocator.instance.getOrProvide(
+    MainServiceLocator.instance.getOrProvide(
       allowedScopes,
       threadSafetyMode,
       provider

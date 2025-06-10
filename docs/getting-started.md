@@ -1,10 +1,10 @@
-# MapSL: Getting Started with the Simple Module
+# MapSL: Getting Started with the Simple Flavor
 
 Welcome to MapSL! This guide will help you get started with the basics of using MapSL for dependency
 management in your Kotlin projects. We'll focus on the `simple` module, which provides a streamlined
 API recommended for most common use cases like managing application-wide singletons.
 
-## What is MapSL (Simple Module)?
+## What is MapSL (Simple Flavor)?
 
 MapSL is a Service Locator library for Kotlin. The `simple` module offers an easy-to-understand
 approach to managing dependencies. It allows you to register and retrieve services using their
@@ -23,9 +23,14 @@ The key benefits of using MapSL's `simple` module include:
 
 ## 1. Add Dependencies
 
-To use the `simple` module, add the `simple` dependency to your main source set and the
+To use the `simple` flavor, add the `simple` module dependency to your main source set and the
 `simple-testing` dependency to your test source set in your project's `build.gradle.kts` file.
 You'll also need a mocking library for testing.
+
+You may use the `simple-scaffold` module instead of `simple` if you would like a basic
+`MainServiceLocator` already configured with two scopes: `Production` and `Testing`. This
+is more limited, but allows you to skip some of the steps below.
+See [scaffold guidance](./scaffold.md) for more details.
 
 ```kotlin
 // build.gradle.kts
@@ -33,6 +38,9 @@ You'll also need a mocking library for testing.
 dependencies {
   // Add the simple module for core MapSL functionality in your main code
   implementation("com.keyboardr.mapsl:simple:<latest_version>")
+
+  // Use this instead if you want a MainServiceLocator already configured
+  implementation("com.keyboardr.mapsl:simple-scaffold:<latest_version>")
 
   // Add the simple-testing module for test utilities 
   testImplementation("com.keyboardr.mapsl:simple-testing:<latest_version>")
@@ -61,30 +69,32 @@ using a provider lambda, the lambda is stored and only executed the first time y
 service using its class. The created instance is then cached and returned for all subsequent
 requests for the same class from that locator instance.
 
-## 3. Set up Your Process Service Locator
+## 3. Set up Your Main Service Locator
+
+If you are using the `simple-scaffold` module, this step is already done for you.
 
 For most applications, it's helpful to have a single, application-wide instance of
 `SimpleServiceLocator` that holds all your top-level dependencies. A common pattern is to create a
-singleton object (e.g., `ProcessServiceLocator`) to manage this instance.
+singleton object (e.g., `MainServiceLocator`) to manage this instance.
 
 You'll also create a `ServiceLocatorScope` type (usually an enum or sealed hierarchy) to define the
 different environments relevant to your project. See [Scopes](scopes.md) for more detail on how
 scopes are used to track the context of a `ServiceLocator`.
 
 ```kotlin
-// In a file like ProcessServiceLocator.kt in your main source set
+// In a file like MainServiceLocator.kt in your main source set
 
 // Define the different possible scopes for your Service Locator instances
 enum class ServiceLocatorScope { Production, Testing }
 
-object ProcessServiceLocator {
+object MainServiceLocator {
 
   // The single instance of SimpleServiceLocator for this process
   lateinit var instance: SimpleServiceLocator<ServiceLocatorScope>
     private set // Prevent external code from replacing the instance directly
 
   /**
-   * Initializes the ProcessServiceLocator with a SimpleServiceLocator instance.
+   * Initializes the MainServiceLocator with a SimpleServiceLocator instance.
    * This should be called once early in the application's lifecycle.
    *
    * @param serviceLocator The SimpleServiceLocator instance to use (typically Production or Testing).
@@ -98,7 +108,7 @@ object ProcessServiceLocator {
   ) {
     // Optional: Add a check to ensure registration only happens once in production
     if (serviceLocator.scope == ServiceLocatorScope.Production) {
-      check(!::instance.isInitialized) { "ProcessServiceLocator is already initialized" }
+      check(!::instance.isInitialized) { "MainServiceLocator is already initialized" }
     }
 
     // Store the provided locator instance
@@ -123,7 +133,10 @@ object ProcessServiceLocator {
 
 ## 4. Initialize the Service Locator at Application Startup
 
-Call the `ProcessServiceLocator.register` function as early as possible in your application's entry
+If you are using the `simple-scaffold` module, this step is already done for Android. Other
+platforms must still complete this step.
+
+Call the `MainServiceLocator.register` function as early as possible in your application's entry
 point to set up the main `SimpleServiceLocator` instance with the appropriate scope (e.g.,
 `Production`).
 
@@ -137,10 +150,10 @@ class SampleApplication : Application() {
   override fun onCreate() {
     super.onCreate()
 
-    // Initialize ProcessServiceLocator with a Production scope
+    // Initialize MainServiceLocator with a Production scope
     // Most services will register themselves lazily upon first access
     // via the service locator delegate (see below).
-    ProcessServiceLocator.register(
+    MainServiceLocator.register(
       SimpleServiceLocator(ServiceLocatorScope.Production),
       this.applicationContext, // Pass necessary initial context
     ) {
@@ -163,26 +176,26 @@ The most common way to use `SimpleServiceLocator` is to access services using a 
 that internally calls `getOrProvide`. This pattern allows services to **lazily register themselves**
 the first time they are accessed via that property. This way you don't need to list every service in
 the
-`ProcessServiceLocator.register` block.
+`MainServiceLocator.register` block.
 
-First, define the property delegate in a shared location:
+First, define the property delegate in a shared location (this is already done in the scaffold):
 
 ```kotlin
-// In a file in your main source set, often the same file as ProcessServiceLocator
+// In a file in your main source set, often the same file as MainServiceLocator
 
-// Delegate for lazy service access using getOrProvide from the ProcessServiceLocator.
+// Delegate for lazy service access using getOrProvide from the MainServiceLocator.
 // This is the recommended delegate for typical services.
 inline fun <reified T : Any> serviceLocator(
   // Define which scopes are allowed to *provide* the service via this delegate
   // if it's not already registered. Defaults to Production scope.
   noinline allowedScopes: (ServiceLocatorScope) -> Boolean = { it == ServiceLocatorScope.Production },
   // Configure thread safety for the lazy creation
-  threadSafetyMode: LazyThreadSafetyMode = ProcessServiceLocator.instance.defaultThreadSafetyMode,
+  threadSafetyMode: LazyThreadSafetyMode = MainServiceLocator.instance.defaultThreadSafetyMode,
   // The provider lambda; receives the current scope if it runs.
   noinline provider: (ServiceLocatorScope) -> T
 ): ReadOnlyProperty<Any, T> = object : ReadOnlyProperty<Any, T> {
   override fun getValue(thisRef: Any, property: KProperty<*>): T =
-    ProcessServiceLocator.instance.getOrProvide(
+    MainServiceLocator.instance.getOrProvide(
       allowedScopes,
       threadSafetyMode,
       provider
@@ -231,7 +244,7 @@ fun performAction() {
 ```
 
 This pattern makes your service declarations self-contained and promotes lazy initialization by
-default. The `ProcessServiceLocator.register` block becomes simpler, primarily handling the
+default. The `MainServiceLocator.register` block becomes simpler, primarily handling the
 initialization of the locator itself and registration of any fundamental, eagerly needed, or
 context-dependent services.
 
@@ -244,7 +257,7 @@ See [this example](samples/multimodule/shared/src/commonMain/kotlin/com/keyboard
 ### Pre-Registration (`put`)
 
 While the `getOrProvide` delegate pattern is common, you can still use `put` directly in the
-`ProcessServiceLocator.register` block. This is suitable for:
+`MainServiceLocator.register` block. This is suitable for:
 
 - Services that **must** be created eagerly at application startup.
 - Fundamental services like the application context (as shown above).
@@ -255,7 +268,7 @@ While the `getOrProvide` delegate pattern is common, you can still use `put` dir
 
 ```kotlin
 // Example of put used in the registration block (typically for specific cases)
-ProcessServiceLocator.register(SimpleServiceLocator(ServiceLocatorScope.Production), this) {
+MainServiceLocator.register(SimpleServiceLocator(ServiceLocatorScope.Production), this) {
   // Example: Eagerly instantiate a Configuration instance
   val settings = AppSettings(apiUrl = "[https://api.myapp.com](https://api.myapp.com)")
   put<AppSettings> { settings }
@@ -268,7 +281,7 @@ ProcessServiceLocator.register(SimpleServiceLocator(ServiceLocatorScope.Producti
 > [!IMPORTANT]
 > Even when a service is registered using `put`, it is a best practice to encapsulate the access
 > to that service within an `instance` property (or similar getter) in the service's companion
-> object. **Avoid scattering direct calls to `ProcessServiceLocator.instance.get<ServiceType>()`
+> object. **Avoid scattering direct calls to `MainServiceLocator.instance.get<ServiceType>()`
 > throughout your codebase.** This maintains a single, clear access point for the service. Ideally,
 > the `put` call in the registration block and the `get` call should be introduced in the same
 > commit.
@@ -277,7 +290,7 @@ ProcessServiceLocator.register(SimpleServiceLocator(ServiceLocatorScope.Producti
 class AppSettings(val apiUrl: String) {
   companion object {
     val instance: AppSettings
-      get() = ProcessServiceLocator.instance.get<AppSettings>()
+      get() = MainServiceLocator.instance.get<AppSettings>()
   }
 }
 ```
@@ -294,7 +307,7 @@ hasn't been explicitly registered in your test setup.
    Implement the abstract `createMock(clazz: KClass<T>): T` function using your chosen mocking
    library (e.g., Mockito or MockK) to define how default mocks are created.
 3. In your test class's setup method (annotated with `@Before` in JUnit), register your
-   `TestServiceLocator` instance using `ProcessServiceLocator.register`. This swaps out the
+   `TestServiceLocator` instance using `MainServiceLocator.register`. This swaps out the
    production locator for the testing one for the duration of the test. You can use the optional
    registration block here to `put` specific fake implementations or pre-configured mocks for
    services you need to control in your tests.
@@ -316,9 +329,9 @@ object TestServiceLocator :
     applicationContext: Context = ApplicationProvider.getApplicationContext(), // Use Android test context by default
     registrationBlock: SimpleServiceLocator<ServiceLocatorScope>.() -> Unit = {}
   ) {
-    // Assuming ProcessServiceLocator is accessible and has a public register function
+    // Assuming MainServiceLocator is accessible and has a public register function
     // like shown in Step 3, which allows overriding for testing.
-    ProcessServiceLocator.register(this, applicationContext, registrationBlock)
+    MainServiceLocator.register(this, applicationContext, registrationBlock)
   }
 }
 
@@ -356,7 +369,7 @@ class MyServiceTest {
     myService.fetchData()
 
     // Verify interactions if needed
-    verify(ProcessServiceLocator.instance.get<NetworkClient>()).getEndpoint()
+    verify(MainServiceLocator.instance.get<NetworkClient>()).getEndpoint()
   }
 }
 ```
@@ -407,9 +420,9 @@ fun getFooFromFactory() = FooFactory.instance.createFoo()
 
 You've successfully set up and used MapSL's `simple` module!
 
-1. Add `simple` and `simple-testing` dependencies.
-2. Create a `ProcessServiceLocator` singleton holding `SimpleServiceLocator<S>`.
-3. Initialize `ProcessServiceLocator` at application startup with a scope, using `put` for
+1. Add `simple` (or `simple-scaffold`) and `simple-testing` dependencies.
+2. Create a `MainServiceLocator` singleton holding `SimpleServiceLocator<S>`.
+3. Initialize `MainServiceLocator` at application startup with a scope, using `put` for
    fundamental services.
 4. For typical services, define a `companion object val instance by serviceLocator { ... }` property
    delegate for lazy self-registration via `getOrProvide`.

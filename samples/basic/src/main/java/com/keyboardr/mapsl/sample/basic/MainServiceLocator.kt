@@ -3,7 +3,7 @@ package com.keyboardr.mapsl.sample.basic
 import android.content.Context
 import com.keyboardr.mapsl.SimpleServiceLocator
 
-object ProcessServiceLocator {
+object MainServiceLocator {
   lateinit var instance: SimpleServiceLocator<ServiceLocatorScope>
     private set
 
@@ -13,7 +13,7 @@ object ProcessServiceLocator {
     registrationBlock: SimpleServiceLocator<ServiceLocatorScope>.() -> Unit = {},
   ) {
     if (serviceLocator.scope == ServiceLocatorScope.Production) {
-      check(!::instance.isInitialized) { "ProcessServiceLocator is already initialized" }
+      check(!::instance.isInitialized) { "MainServiceLocator is already initialized" }
     }
     instance = serviceLocator.apply {
       put<ApplicationContextHolder> { ApplicationContextHolder(applicationContext) }

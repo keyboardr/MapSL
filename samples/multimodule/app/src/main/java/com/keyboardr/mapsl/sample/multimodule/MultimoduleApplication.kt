@@ -7,14 +7,14 @@ import android.os.Build
 import android.os.Process
 import androidx.core.content.getSystemService
 import com.keyboardr.mapsl.SimpleServiceLocator
-import com.keyboardr.mapsl.sample.multimodule.locator.ProcessServiceLocator
+import com.keyboardr.mapsl.sample.multimodule.locator.MainServiceLocator
 import com.keyboardr.mapsl.sample.multimodule.locator.ServiceLocatorScope
 import com.keyboardr.mapsl.sample.multimodule.platform.PlatformContext
 
 class MultimoduleApplication : Application() {
   override fun onCreate() {
     super.onCreate()
-    ProcessServiceLocator.register(
+    MainServiceLocator.register(
       SimpleServiceLocator(ServiceLocatorScope.Process(processName = getProcessNameCompat())),
       PlatformContext(this)
     )

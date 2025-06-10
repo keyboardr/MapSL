@@ -13,7 +13,7 @@ import com.keyboardr.mapsl.keys.SingletonKey
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
-object ProcessServiceLocator {
+object MainServiceLocator {
   lateinit var instance: ScopedServiceLocator<ServiceLocatorScope>
     private set
 
@@ -23,7 +23,7 @@ object ProcessServiceLocator {
     registrationBlock: ScopedServiceLocator<ServiceLocatorScope>.() -> Unit = {},
   ) {
     if (serviceLocator.scope is ServiceLocatorScope.ProdScope) {
-      check(!::instance.isInitialized) { "ProcessServiceLocator is already initialized" }
+      check(!::instance.isInitialized) { "MainServiceLocator is already initialized" }
     }
     instance = serviceLocator.apply {
       put(applicationContextKey, applicationContext)
@@ -44,16 +44,16 @@ sealed interface ServiceLocatorScope {
 
 
 /**
- * A property delegate to access a service stored in [ProcessServiceLocator] using [getOrProvide].
+ * A property delegate to access a service stored in [MainServiceLocator] using [getOrProvide].
  */
 inline fun <reified T : Any> serviceLocator(
   key: LazyKey<T> = classKey<T>(),
   noinline allowedScopes: (ServiceLocatorScope) -> Boolean = { it is ServiceLocatorScope.ProdScope },
-  threadSafetyMode: LazyThreadSafetyMode = ProcessServiceLocator.instance.defaultLazyKeyThreadSafetyMode,
+  threadSafetyMode: LazyThreadSafetyMode = MainServiceLocator.instance.defaultLazyKeyThreadSafetyMode,
   noinline provider: () -> T,
 ): ReadOnlyProperty<Any, T> = object : ReadOnlyProperty<Any, T> {
   override fun getValue(thisRef: Any, property: KProperty<*>): T =
-    ProcessServiceLocator.instance.getOrProvide(
+    MainServiceLocator.instance.getOrProvide(
       key,
       allowedScopes,
       threadSafetyMode,
@@ -63,7 +63,7 @@ inline fun <reified T : Any> serviceLocator(
 
 @OptIn(ExperimentalKeyType::class)
 fun <T : Any, GetParams> FactoryKey<T, GetParams>.create(params: GetParams): T =
-  ProcessServiceLocator.instance.get(this, params)
+  MainServiceLocator.instance.get(this, params)
 
 @OptIn(ExperimentalKeyType::class)
-fun <T : Any> FactoryKey<T, Unit>.create(): T = ProcessServiceLocator.instance.get(this)
+fun <T : Any> FactoryKey<T, Unit>.create(): T = MainServiceLocator.instance.get(this)

@@ -12,10 +12,15 @@ Directly using the production `ServiceLocator` in tests would often lead to:
 MapSL provides dedicated testing modules and classes designed to make testing easier by allowing you
 to swap out the production service locator for one specifically configured for testing.
 
-## Testing with the Simple Module (`simple.testing`)
+## Testing with the Simple Module (`simple-testing`)
 
 If your application uses `SimpleServiceLocator` (which is the recommended starting point), the
 `simple.testing` module provides the tools you need for testing.
+
+If your application uses the `simple-scaffold` module, a `TestServiceLocator` class has already been
+created for you, and you can skip step 2. Instead, you will just need to create a `MockFactory` to
+provide when registering (its implementation is the same as the `createMock()` function in the
+`TestServiceLocator` in step 2).
 
 ### 1. Add Dependencies
 
@@ -53,7 +58,7 @@ object TestServiceLocator :
   override fun <T : Any> createMock(clazz: KClass<T>): T {
     // Example using Mockito
     return mock(clazz.java)
-    
+
     // Using MockK
     // return mockkClass<T>(clazz)
   }
@@ -63,8 +68,8 @@ object TestServiceLocator :
     applicationContext: Context, // Pass any necessary test setup context
     registrationBlock: SimpleServiceLocator<ServiceLocatorScope>.() -> Unit = {}
   ) {
-    // Assuming you have a ProcessServiceLocator singleton in your app
-    ProcessServiceLocator.register(this, applicationContext) {
+    // Assuming you have a MainServiceLocator singleton in your app
+    MainServiceLocator.register(this, applicationContext) {
       // If you have common fakes that test classes should use, you can pre-register them here.
       put<CoreDependency> { FakeCoreDependency() }
 
@@ -79,7 +84,7 @@ object TestServiceLocator :
 
 In your test class, use a setup method (like one annotated with `@Before` in JUnit) to register your
 `TestServiceLocator` as the main service locator for the process. This ensures that any code under
-test that accesses the global `ProcessServiceLocator` will receive the testing instance instead of
+test that accesses the global `MainServiceLocator` will receive the testing instance instead of
 the real production one.
 
 In this setup block, you can also register specific fake implementations or pre-configured mocks for
@@ -108,7 +113,7 @@ class MyServiceTest {
       }
     }
 
-    // You can also configure mocks outside the `register` function
+    // You can also configure mocks after calling the `register` function
     // In this example YetAnotherService.instance uses `getOrProvide()`
     YetAnotherService.instance.stub {
       on { fetchDependency() } doAnswer { Dependency.instance }
@@ -148,6 +153,29 @@ In this setup:
 
 This allows you to easily control the dependencies of the code you are testing by selectively
 providing fakes or mocks in your test setup.
+
+## Application configuration with Robolectric (Android only)
+
+If you have `testOptions.unitTests.includeAndroidResources` set to `true` for your project,
+Robolectric will run your `Application` class at the start of testing. For projects that initialize
+their `MainServiceLocator` in `Application.onCreate()`, this will cause the production
+service locator to be registered. There are two main workarounds:
+
+- Use a different `Application` class for tests. This can either be done using a `@Config`
+  annotation on the test class, or by setting it in a properties file.
+    - Typically, using `android.app.Application` is appropriate for most unit tests. This can be
+      done by creating a `src/test/resources/robolectric.properties` file with the contents
+      `application=android.app.Application`. See https://robolectric.org/configuring/ for more
+      details.
+- Ensure service locators with a `Production` scope don't overwrite testing scopes in the `register`
+  function. Rather than the `check` function asserting that `instance` is not initialized, just
+  assert that one production scope is not being replaced by another production scope. This check
+  becomes a bit awkward, so the other workaround is recommended.
+
+#### Scaffold
+
+The initializer provided by the scaffold is not run during tests, so if your `MainServiceLocator` is
+initialized automatically, this doesn't apply.
 
 ## Testing with Scoped Service Locators (`scoped.testing`)
 

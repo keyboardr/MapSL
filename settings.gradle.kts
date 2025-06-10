@@ -31,7 +31,8 @@ include(":docs")
 include(":lifecycle")
 include(":scoped", ":scoped:testing")
 project(":scoped:testing").name = "scoped-testing"
-include(":simple", ":simple:testing")
+include(":simple", ":simple:testing", ":simple:scaffold")
+project(":simple:scaffold").name = "simple-scaffold"
 project(":simple:testing").name = "simple-testing"
 include(":samples:basic")
 include(":samples:keysample")
@@ -42,3 +43,4 @@ include(
   ":samples:multimodule:shared",
   ":samples:multimodule:testing",
 )
+include(":samples:scaffold")

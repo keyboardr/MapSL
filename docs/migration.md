@@ -69,7 +69,7 @@ effect.
 Example:
 
 ```kotlin
-ProcessServiceLocator.register(ScopedServiceLocator(ProductionScope), /* ... */) {
+MainServiceLocator.register(ScopedServiceLocator(ProductionScope), /* ... */) {
   val myService = MyService()
   put<MyService> { myService }
 }
@@ -93,7 +93,7 @@ class ItemFactory {
 
 ## Migration Steps
 
-Assuming you are using the recommended pattern with a `ProcessServiceLocator` singleton backed by
+Assuming you are using the recommended pattern with a `MainServiceLocator` singleton backed by
 `SimpleServiceLocator`, here are the steps to migrate. This process focuses on switching the
 underlying locator type, which is the most common first step. Using different key types is covered
 in a later section.
@@ -120,14 +120,14 @@ dependencies {
 }
 ```
 
-### Step 2: Change `ProcessServiceLocator` to Use `ScopedServiceLocator`
+### Step 2: Change `MainServiceLocator` to Use `ScopedServiceLocator`
 
-Modify your `ProcessServiceLocator` singleton to hold a `ScopedServiceLocator` instance instead of
+Modify your `MainServiceLocator` singleton to hold a `ScopedServiceLocator` instance instead of
 `SimpleServiceLocator`. Assume a `ServiceLocatorScope` enum is defined for the scope type.
 
 ```kotlin
 // Before (using simple)
-object ProcessServiceLocator {
+object MainServiceLocator {
   // SimpleServiceLocator also supports scoping
   private lateinit var instance: SimpleServiceLocator<ServiceLocatorScope>
 
@@ -138,7 +138,7 @@ object ProcessServiceLocator {
 }
 
 // After (using core)
-object ProcessServiceLocator {
+object MainServiceLocator {
   // Change type to ScopedServiceLocator, using the same scope type
   private lateinit var instance: ScopedServiceLocator<ServiceLocatorScope>
 
@@ -159,11 +159,11 @@ of creating a `SimpleServiceLocator` with a scope, you'll create an instance of
 ```kotlin
 // Before (Application.onCreate or main)
 // Assuming ProductionScope is a value of ServiceLocatorScope
-ProcessServiceLocator.register(SimpleServiceLocator(ProductionScope), /* ... */)
+MainServiceLocator.register(SimpleServiceLocator(ProductionScope), /* ... */)
 
 // After (Application.onCreate or main)
 // Create a ScopedServiceLocator with the same scope instance
-ProcessServiceLocator.register(ScopedServiceLocator(ProductionScope), /* ... */)
+MainServiceLocator.register(ScopedServiceLocator(ProductionScope), /* ... */)
 ```
 
 ### Step 3: Update Service Registrations (`put` calls)
@@ -182,7 +182,7 @@ extension function from the `com.keyboardr.mapsl.keys` package.
 // import com.keyboardr.mapsl.keys.put
 
 // Inside your registration lambda (syntax is the same as before)
-ProcessServiceLocator.register(ScopedServiceLocator(ProductionScope), /* ... */) { // Updated locator type
+MainServiceLocator.register(ScopedServiceLocator(ProductionScope), /* ... */) { // Updated locator type
   put<MyService> { MyServiceImpl() }
   // ... other registrations
 }
@@ -239,14 +239,14 @@ for the `get` or `getOrProvide` extension functions.
 
 class MyService {
   companion object {
-    val instance = ProcessServiceLocator.instance.get<MyService>()
+    val instance = MainServiceLocator.instance.get<MyService>()
   }
 }
 
 class AnotherService {
   companion object {
     val instance =
-      ProcessServiceLocator.instance.getOrProvide<AnotherService> { AnotherServiceImpl() }
+      MainServiceLocator.instance.getOrProvide<AnotherService> { AnotherServiceImpl() }
   }
 }
 ```
@@ -314,7 +314,7 @@ To use a different key type, you must:
    type.
 
     ```kotlin
-    ProcessServiceLocator.register(ScopedServiceLocator(ProductionScope), /* ... */) {
+    MainServiceLocator.register(ScopedServiceLocator(ProductionScope), /* ... */) {
         // Using explicit LazyKey
         put(MyService.Key) { MyService() }
     
@@ -336,16 +336,16 @@ To use a different key type, you must:
 
     ```kotlin
     // Retrieving with explicit LazyKey
-    val myService: MyService = ProcessServiceLocator.instance.get(MyService.Key)
+    val myService: MyService = MainServiceLocator.instance.get(MyService.Key)
     
     // Retrieving with explicit SingletonKey
-    val anotherService: AnotherService = ProcessServiceLocator.instance.get(AnotherService.Key)
+    val anotherService: AnotherService = MainServiceLocator.instance.get(AnotherService.Key)
     
     // Retrieving with explicit FactoryKey
-    val createdItem: CreatedItem = ProcessServiceLocator.instance.get(CreatedItem.Key, ItemParams()) // Pass ItemParams
+    val createdItem: CreatedItem = MainServiceLocator.instance.get(CreatedItem.Key, ItemParams()) // Pass ItemParams
     
     // Retrieving with explicit LifecycleKey
-    // val lifecycleService: LifecycleScopedService = ProcessServiceLocator.instance.get(LifecycleScopedService.Key, lifecycleOwner) // Pass LifecycleOwner
+    // val lifecycleService: LifecycleScopedService = MainServiceLocator.instance.get(LifecycleScopedService.Key, lifecycleOwner) // Pass LifecycleOwner
     ```
 
 By following these steps, you can selectively introduce different key types for services that

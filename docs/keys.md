@@ -42,7 +42,7 @@ Let's explore each key kind in detail:
 > [!Note]
 > The examples below show usage with a `serviceLocator` declared in local scope, using separate
 `put` and `get` calls for clarity. In typical application architectures, you would often use a
-> globally accessible `ServiceLocator` singleton (like `ProcessServiceLocator` in the samples),
+> globally accessible `ServiceLocator` singleton (like `MainServiceLocator` in the samples),
 > declare key instances and their providers within the respective service companion objects, and
 > leverage `getOrProvide()` for convenient lazy registration and retrieval when possible.
 

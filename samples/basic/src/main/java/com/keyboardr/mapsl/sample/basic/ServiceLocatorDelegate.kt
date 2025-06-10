@@ -4,15 +4,15 @@ import com.keyboardr.mapsl.SimpleServiceLocator
 import kotlin.properties.ReadOnlyProperty
 
 /**
- * A property delegate to access a service stored in [ProcessServiceLocator] using
+ * A property delegate to access a service stored in [MainServiceLocator] using
  * [SimpleServiceLocator.getOrProvide].
  */
 inline fun <reified T : Any> serviceLocator(
   noinline allowedScopes: (ServiceLocatorScope) -> Boolean = { it == ServiceLocatorScope.Production },
-  threadSafetyMode: LazyThreadSafetyMode = ProcessServiceLocator.instance.defaultThreadSafetyMode,
+  threadSafetyMode: LazyThreadSafetyMode = MainServiceLocator.instance.defaultThreadSafetyMode,
   noinline provider: (ServiceLocatorScope) -> T,
 ): ReadOnlyProperty<Any, T> = ReadOnlyProperty { _, _ ->
-  ProcessServiceLocator.instance.getOrProvide(
+  MainServiceLocator.instance.getOrProvide(
     allowedScopes,
     threadSafetyMode,
     provider

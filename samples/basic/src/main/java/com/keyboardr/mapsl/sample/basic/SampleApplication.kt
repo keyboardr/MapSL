@@ -6,7 +6,7 @@ import com.keyboardr.mapsl.SimpleServiceLocator
 class SampleApplication : Application() {
   override fun onCreate() {
     super.onCreate()
-    ProcessServiceLocator.register(
+    MainServiceLocator.register(
       SimpleServiceLocator(ServiceLocatorScope.Production),
       applicationContext
     )

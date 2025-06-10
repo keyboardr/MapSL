@@ -1,6 +1,8 @@
 package com.keyboardr.mapsl.sample.basic
 
-class MyService private constructor() {
+import androidx.annotation.VisibleForTesting
+
+class MyService @VisibleForTesting constructor() {
 
   fun sayHello() = "Hello, MapSL!"
 

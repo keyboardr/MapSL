@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "com.keyboardr.mapsl"
-version = "0.1.0"
+version = "0.2.0"
 
 if(properties.containsKey("repsyUrl")) {
   publishing {

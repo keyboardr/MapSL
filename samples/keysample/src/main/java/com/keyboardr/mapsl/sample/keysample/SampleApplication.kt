@@ -14,14 +14,14 @@ import com.keyboardr.mapsl.sample.keysample.domain.factory.FactoryProduced
 import com.keyboardr.mapsl.sample.keysample.domain.lifecycle.LifecycleScopedManager
 import com.keyboardr.mapsl.sample.keysample.domain.single.LazyPreregisteredSingleton
 import com.keyboardr.mapsl.sample.keysample.domain.single.PreregisteredSingleton
-import com.keyboardr.mapsl.sample.keysample.locator.ProcessServiceLocator
+import com.keyboardr.mapsl.sample.keysample.locator.MainServiceLocator
 import com.keyboardr.mapsl.sample.keysample.locator.ServiceLocatorScope
 import kotlin.time.ExperimentalTime
 
 class SampleApplication : Application() {
   override fun onCreate() {
     super.onCreate()
-    ProcessServiceLocator.register(
+    MainServiceLocator.register(
       ScopedServiceLocator(ServiceLocatorScope.Process(processName = getProcessNameCompat())),
       this
     ) {

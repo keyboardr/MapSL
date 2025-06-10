@@ -1,6 +1,6 @@
 package com.keyboardr.mapsl.sample.multimodule
 
-import com.keyboardr.mapsl.sample.multimodule.locator.ProcessServiceLocator
+import com.keyboardr.mapsl.sample.multimodule.locator.MainServiceLocator
 import com.keyboardr.mapsl.sample.multimodule.locator.ServiceLocatorScope
 import com.keyboardr.mapsl.sample.multimodule.platform.PlatformContext
 import com.keyboardr.mapsl.sample.multimodule.services.BazManager
@@ -14,7 +14,7 @@ object TestServiceLocator :
   override fun <T : Any> createMock(clazz: KClass<T>): T = mockForClass<T>(clazz)
 
   fun register(context: PlatformContext) {
-    ProcessServiceLocator.register(this, context) {
+    MainServiceLocator.register(this, context) {
       // Register common fakes here
       put<BazManager> {
         mock<BazManager> {

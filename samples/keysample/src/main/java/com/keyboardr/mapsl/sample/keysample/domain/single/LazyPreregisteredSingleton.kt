@@ -1,7 +1,7 @@
 package com.keyboardr.mapsl.sample.keysample.domain.single
 
 import com.keyboardr.mapsl.get
-import com.keyboardr.mapsl.sample.keysample.locator.ProcessServiceLocator
+import com.keyboardr.mapsl.sample.keysample.locator.MainServiceLocator
 
 class LazyPreregisteredSingleton(val name: String) {
 
@@ -9,6 +9,6 @@ class LazyPreregisteredSingleton(val name: String) {
 
   companion object {
     val instance: LazyPreregisteredSingleton
-      get() = ProcessServiceLocator.instance.get()
+      get() = MainServiceLocator.instance.get()
   }
 }
