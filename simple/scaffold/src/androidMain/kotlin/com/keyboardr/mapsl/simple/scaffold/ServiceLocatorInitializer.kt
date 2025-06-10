@@ -6,7 +6,16 @@ import androidx.startup.Initializer
 import com.keyboardr.mapsl.SimpleServiceLocator
 
 /**
- * Registers [MainServiceLocator] on app startup.
+ * An [Initializer] that automatically registers a production [MainServiceLocator]
+ * on app startup using the `androidx.startup` library.
+ *
+ * This provides the out-of-the-box behavior for the `simple-scaffold`, ensuring the
+ * service locator is available without any manual setup in the `Application` class.
+ *
+ * If you need to customize the startup sequence (e.g., to pre-register services),
+ * you can disable this initializer in your `AndroidManifest.xml`.
+ *
+ * @see [Disable individual initializers](https://developer.android.com/topic/libraries/app-startup#disable-individual)
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY)
 public class ServiceLocatorInitializer : Initializer<SimpleServiceLocator<ServiceLocatorScope>> {

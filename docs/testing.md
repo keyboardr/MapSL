@@ -1,56 +1,41 @@
 # Testing Code that Uses MapSL
 
-When building applications with a Service Locator pattern like MapSL, a common concern is how to
-write effective unit tests for components that retrieve their dependencies from the locator.
-Directly using the production `ServiceLocator` in tests would often lead to:
+When building applications with a Service Locator, a common challenge is writing effective unit
+tests. Using the production `ServiceLocator` directly in tests is not ideal, as it would pull in
+real dependencies (like network clients or databases), making tests slow, flaky, and not properly
+isolated.
 
-1. **Reliance on Global State:** Tests become coupled to the global state of the production
-   `ServiceLocator`, making them fragile and order-dependent.
-2. **Use of Real Dependencies:** Tests would operate on real service implementations (databases,
-   network clients, etc.), making them slow, unpredictable, and difficult to isolate.
+MapSL solves this by providing dedicated testing modules that allow you to easily swap the
+production service locator for a test-specific one that provides mocks or fakes.
 
-MapSL provides dedicated testing modules and classes designed to make testing easier by allowing you
-to swap out the production service locator for one specifically configured for testing.
+## Testing with `simple-testing`
 
-## Testing with the Simple Module (`simple-testing`)
+If your application uses `SimpleServiceLocator` (from the `simple` module), the `simple-testing`
+module provides the tools you need.
 
-If your application uses `SimpleServiceLocator` (which is the recommended starting point), the
-`simple.testing` module provides the tools you need for testing.
+> **Note for `simple-scaffold` users:** If you are using the `simple-scaffold` module, a
+`TestServiceLocator` object has already been created for you. You can skip step 1 below. See
+> the [scaffold guide](./scaffold.md "null") for instructions on how to use it by providing a
+`MockFactory`.
 
-If your application uses the `simple-scaffold` module, a `TestServiceLocator` class has already been
-created for you, and you can skip step 2. Instead, you will just need to create a `MockFactory` to
-provide when registering (its implementation is the same as the `createMock()` function in the
-`TestServiceLocator` in step 2).
+### 1. Setting Up Your Test Locator
 
-### 1. Add Dependencies
-
-Include the `simple-testing` dependency and your preferred mocking library (like Mockito or MockK)
-in your test dependencies.
+First, add the necessary dependencies to your `build.gradle.kts`:
 
 ```kotlin
-// build.gradle.kts (or build.gradle)
 dependencies {
   // ... other dependencies
-  testImplementation("com.keyboardr.mapsl:simple-testing:<version>")
-  testImplementation("org.mockito:mockito-core:<version>") // Example for Mockito
-  testImplementation("org.mockito.kotlin:mockito-kotlin:<version>") // Example for Mockito-Kotlin
-  // or testImplementation("io.mockk:mockk:<version>") // Example for MockK
+  testImplementation("com.keyboardr.mapsl:simple-testing:<latest_version>")
+  testImplementation("org.mockito.kotlin:mockito-kotlin:<latest_version>") // Or io.mockk:mockk for MockK
 }
 ```
 
-### 2. Create a Testing Service Locator
-
-The `simple.testing` module provides `SimpleTestingServiceLocator<S>`. You should create a subclass
-of this in your test source set (e.g., `src/test/kotlin`). This testing locator automatically
-provides mock instances for any service that hasn't been explicitly registered.
-
-The key requirement for your subclass is to implement the abstract `createMock(clazz: KClass<T>): T`
-function. This function is responsible for generating a mock or fake instance for a given class
-type.
+Next, in your test source set (`src/test/kotlin`), create a test-specific service locator by
+subclassing `SimpleTestingServiceLocator<S>`. This object should include a `register` function to
+encapsulate the test setup logic.
 
 ```kotlin
-// In your test source set (e.g., com.yourcompany.yourapp.testing)
-
+// Use the same scope type as your production locator
 object TestServiceLocator :
   SimpleTestingServiceLocator<ServiceLocatorScope>(ServiceLocatorScope.Testing) {
 
@@ -59,40 +44,42 @@ object TestServiceLocator :
     // Example using Mockito
     return mock(clazz.java)
 
-    // Using MockK
-    // return mockkClass<T>(clazz)
+    // Example using MockK
+    // return mockkClass(clazz)
   }
 
-  // Optional: Add a register function to easily set this locator as the process singleton
+  // Add a register function to handle test setup
   fun register(
-    applicationContext: Context, // Pass any necessary test setup context
+    context: Context = ApplicationProvider.getApplicationContext(),
     registrationBlock: SimpleServiceLocator<ServiceLocatorScope>.() -> Unit = {}
   ) {
-    // Assuming you have a MainServiceLocator singleton in your app
-    MainServiceLocator.register(this, applicationContext) {
-      // If you have common fakes that test classes should use, you can pre-register them here.
+    // This function calls the main register method, swapping the production
+    // locator with this test instance.
+    MainServiceLocator.register(this, context) {
+      // If you have common fakes that all tests should use, pre-register them here.
       put<CoreDependency> { FakeCoreDependency() }
 
-      // Call the registration block for the specific test suite
+      // Then, call the registration block for test-suite-specific fakes.
       registrationBlock()
     }
   }
 }
+
 ```
 
-### 3. Set Up the Test Environment
+### 2. Using the Test Locator in Tests
 
-In your test class, use a setup method (like one annotated with `@Before` in JUnit) to register your
-`TestServiceLocator` as the main service locator for the process. This ensures that any code under
-test that accesses the global `MainServiceLocator` will receive the testing instance instead of
-the real production one.
+In your test class, use a setup method (like one annotated with `@Before` in JUnit) to call your new
+`TestServiceLocator.register()` function. This ensures that any code under test that accesses the
+global `MainServiceLocator` will receive the testing instance.
 
-In this setup block, you can also register specific fake implementations or pre-configured mocks for
-services that you need to control or inspect during the test.
+Inside the registration block passed to `register`, you can use `put` to provide fakes or
+pre-configured mocks specific to your test suite. Unlike production locators, which throw an error
+if the same key is registered twice, testing locators allow re-registration. This means any
+dependency you provide here will overwrite any common fakes that may have been pre-registered, as
+well as the default mock behavior.
 
 ```kotlin
-// In your test class (e.g., MyServiceTest.kt)
-
 @RunWith(AndroidJUnit4::class) // Use appropriate test runner
 class MyServiceTest {
 
@@ -142,71 +129,65 @@ class MyServiceTest {
 }
 ```
 
-In this setup:
+This pattern gives you complete control: you get default mocks for free for any dependency you don't
+care about in a specific test, and you can easily provide specific fakes for the dependencies you do
+care about.
 
-- When code requests a dependency that *has not* been registered in the
-  `TestServiceLocator.register` block, the `SimpleTestingServiceLocator`'s overridden `onMiss`
-  function is called, which in turn calls your `createMock` function to provide a mock instance.
-- When code requests a dependency that *has* been registered in the `TestServiceLocator.register`
-  block using `put`, the provided fake or mock instance is returned instead of creating a default
-  mock.
+## Testing with `scoped-testing`
 
-This allows you to easily control the dependencies of the code you are testing by selectively
-providing fakes or mocks in your test setup.
+If your application uses `ScopedServiceLocator` and explicit keys (e.g., `LazyKey`, `SingletonKey`),
+you should use the `scoped-testing` module and its `TestingServiceLocator<S>` class.
 
-## Application configuration with Robolectric (Android only)
+The setup is very similar, but you will use explicit keys when registering fakes.
 
-If you have `testOptions.unitTests.includeAndroidResources` set to `true` for your project,
-Robolectric will run your `Application` class at the start of testing. For projects that initialize
-their `MainServiceLocator` in `Application.onCreate()`, this will cause the production
-service locator to be registered. There are two main workarounds:
+```kotlin
+// In your test's setUp function
+@Before
+fun setUp() {
+  TestScopedServiceLocator.register(/*...*/) {
+    // Use an explicit key to register a fake implementation
+    put(MyService.Key, FakeMyService())
 
-- Use a different `Application` class for tests. This can either be done using a `@Config`
-  annotation on the test class, or by setting it in a properties file.
-    - Typically, using `android.app.Application` is appropriate for most unit tests. This can be
-      done by creating a `src/test/resources/robolectric.properties` file with the contents
-      `application=android.app.Application`. See https://robolectric.org/configuring/ for more
-      details.
-- Ensure service locators with a `Production` scope don't overwrite testing scopes in the `register`
-  function. Rather than the `check` function asserting that `instance` is not initialized, just
-  assert that one production scope is not being replaced by another production scope. This check
-  becomes a bit awkward, so the other workaround is recommended.
+    // You can still use ClassKey-based puts for simple cases
+    put<AnotherService> { FakeAnotherService() }
+  }
+}
+```
 
-#### Scaffold
+The `TestingServiceLocator` understands the different key kinds and their behaviors. For example, it
+will provide a new mock each time you `get` from a `FactoryKey`, but will return the same mock for
+subsequent `get` calls on a `LazyKey` or `SingletonKey`.
 
-The initializer provided by the scaffold is not run during tests, so if your `MainServiceLocator` is
-initialized automatically, this doesn't apply.
+## Handling Android Application `onCreate` in Tests
 
-## Testing with Scoped Service Locators (`scoped.testing`)
+If you use Robolectric for unit tests and your production `Application.onCreate()` initializes your
+`MainServiceLocator`, this can cause the production locator to be registered before your tests run.
 
-If your application uses `ScopedServiceLocator` and leverages different key types explicitly (like
-`LazyKey`, `SingletonKey`, `FactoryKey`, `LifecycleKey`), you should use the `scoped.testing` module
-instead of `simple.testing`. You will use `TestingServiceLocator<S>` instead of
-`SimpleTestingServiceLocator<S>`
+The best solution is to configure Robolectric to use a different `Application` class for tests.
+Often, using the default `android.app.Application` is sufficient. You can do this by creating a
+`src/test/resources/robolectric.properties` file with the following content:
 
-The rest will mostly be the same, except using explicit keys for some services. For most key types,
-`TestingServiceLocator` will return the same mock instance for a key once one has been created. The
-exception is `FactoryKey`, which will return a new mock each time (to mirror its production
-behavior). If you have custom key types, you can override `TestingServiceLocator.createMockEntry()`
-to specify the correct behavior.
+```properties
+application=android.app.Application
+```
+
+This configuration prevents the production `Application.onCreate()` from running during tests,
+allowing your test setup to register the `TestServiceLocator` correctly. This step is not required
+if your app does not initialize the service locator in `Application.onCreate()`. For
+`simple-scaffold` users, this means the step is unnecessary if you are using the default automatic
+initializer, as it is not run during tests.
 
 ## Summary
 
-- **Mocks by Default:** If you request a service via `get` or `getOrProvide` and no registration
-  exists for that key or class, the testing locator will automatically create and provide a mock
-  using your `createMock` implementation.
-- **Override with `put`:** Use the `put` method in your test setup to register specific fake
-  implementations or carefully configured mocks for the services you need to control for a
-  particular test.
-- **`allowReregister = true`:** Testing locators are initialized with `allowReregister = true`,
-  which means you can call `put` for the same key multiple times in your test setup, with the last
-  one overwriting previous registrations. This is useful for setting up different fakes/mocks for
-  different test cases if needed.
-- **FactoryKey Mock Behavior:** For `FactoryKey`, the testing locator provides a *new* mock instance
-  on every `get` call by default, mimicking the factory behavior. For other key types (Lazy,
-  Singleton, ClassKey), it provides the *same* mock instance for repeated `get` calls if no
-  registration is present.
+- **Mocks by Default**: If you request a service and no specific registration exists for it, the
+  testing locator automatically creates and provides a default mock.
 
-By using `SimpleTestingServiceLocator` or `TestingServiceLocator` and strategically registering
-fakes and mocks in your test setup, you can effectively isolate the code you are testing from its
-real dependencies and ensure predictable test results.
+- **Override with `put`**: Use `put` in your test setup to register specific fake implementations or
+  pre-configured mocks for the services you need to control.
+
+- **Flexible Registration**: Unlike production locators, testing locators allow a key to be
+  registered multiple times (the last one wins). This is useful for setting up different fakes for
+  different test cases.
+
+- **`FactoryKey` Behavior**: For a `FactoryKey`, the testing locator provides a *new* mock instance
+  on every `get` call, mimicking the production factory behavior.

@@ -1,119 +1,78 @@
-# Using MapSL in Kotlin Multiplatform Projects (Preferring Expect/Actual with getOrProvide)
+# Using MapSL in Kotlin Multiplatform Projects
 
-Kotlin Multiplatform (KMP) allows you to share code across different platforms. Managing
-dependencies that have platform-specific implementations while accessing them from common shared
-code is a key challenge. MapSL, combined with Kotlin's `expect`/`actual` mechanism, provides a clean
-way for your common code to lazily obtain the correct platform-specific dependency when needed,
-while keeping service access encapsulated.
+Kotlin Multiplatform (KMP) allows you to share code across different platforms. A key challenge in
+KMP is managing dependencies that have platform-specific implementations while accessing them from
+common shared code. MapSL, combined with Kotlin's `expect`/`actual` mechanism, provides a clean and
+effective solution.
 
-## What is Kotlin Multiplatform and Expect/Actual?
-
-Kotlin Multiplatform projects are structured with `commonMain` for shared code and platform-specific
-source sets (e.g., `androidMain`, `iosMain`).
-
-The `expect`/`actual` mechanism is KMP's way of defining a contract in `commonMain` (`expect`
-declaration) that is implemented by platform-specific code (`actual` declaration) in platform source
-sets. This allows common code to call an `expect` function or access an `expect` property, and at
-runtime, the corresponding `actual` implementation for the target platform is executed.
-
-## Why Combine MapSL and Expect/Actual in KMP?
-
-MapSL provides a `ServiceLocator` to manage dependencies. The `getOrProvide()` method, particularly
-when used with a property delegate (`by serviceLocator { ... }` or `by commonService { ... }`),
-allows services to be created lazily the first time they are accessed via a dedicated property (like
-`val instance` in a companion object).
-
-By defining `expect` factory functions (or using `expect` class constructors) in `commonMain` that
-are `actual`ized to create platform-specific service implementations, you can call these `expect`
-mechanisms *within* the `getOrProvide()` provider lambda of your common service's access property.
-
-This results in a pattern where:
-
-1. Common code defines a common service interface/class and a dedicated access property (e.g.,
-   `val instance` in a companion object, typically using a `getOrProvide` delegate).
-2. Accessing this property triggers `getOrProvide()` lazily via the delegate.
-3. The provider lambda within `getOrProvide()` executes *in the common context*, calls an `expect`
-   mechanism that resolves to the correct platform-specific code at runtime to create the service
-   instance.
-4. The created platform-specific instance is then registered in the `ServiceLocator` for its type
-   and returned by the delegate property.
-
-This keeps the logic for obtaining the platform-specific implementation and accessing the service
-encapsulated within the service definition itself, simplifying code that consumes the service.
+This guide focuses on the recommended pattern: defining `expect` factory functions in `commonMain`
+that are called from within a `serviceLocator` delegate, allowing for lazy, platform-specific
+instantiation.
 
 ## 1. Add Dependencies
 
-Add the necessary MapSL modules to your multiplatform project's `build.gradle.kts`. The core MapSL
-modules, including `core`, `scoped`, `simple`, and `lifecycle`, are multiplatform libraries. Add the
-modules you need to your `commonMain` source set if their features are used in shared code.
+Add the necessary MapSL modules to your multiplatform project's `build.gradle.kts`. MapSL's library
+modules (`core`, `scoped`, `simple`, etc.) are multiplatform and should be added to your
+`commonMain` source set.
 
 ```kotlin
-// shared/build.gradle.kts (example for a shared module)
-
+// shared/build.gradle.kts (in a shared module)
 kotlin {
   // Define your targets (android, ios, jvm, etc.)
   androidTarget()
-  jvm("desktop") // Example for Desktop JVM
+  iosX64()
+  iosArm64()
+  iosSimulatorArm64()
+  jvm("desktop")
   // ... other targets
 
   sourceSets {
     commonMain.dependencies {
-      // Add MapSL multiplatform modules needed in common code
-      implementation("com.keyboardr.mapsl:simple:<latest_version>") // Or core/scoped
-
-      // ... other common dependencies (coroutines, serialization, etc.)
+      // Add the MapSL module you are using (e.g., simple)
+      implementation("com.keyboardr.mapsl:simple:<latest_version>")
+      // ... other common dependencies
     }
-
-    // Platform source sets might still need specific dependencies
-    // (e.g., for actual implementations or testing tools)
-    androidMain.dependencies { }
 
     commonTest.dependencies {
-      implementation("com.keyboardr.mapsl:simple-testing:<latest_version>") // Or scoped-testing
+      implementation("com.keyboardr.mapsl:simple-testing:<latest_version>")
     }
-    androidTest.dependencies { }
-    desktopTest.dependencies { }
-    // ... other source sets
   }
 }
 ```
 
-Your application modules (e.g., `androidApp`, `desktopApp`) will typically depend on your shared
-multiplatform module.
-
 ## 2. Set up a Shared Service Locator
 
-Define your main `ServiceLocator` singleton (like `MainServiceLocator`) and your
-`ServiceLocatorScope` in `commonMain`. This object will be the central access point for services
-across all platforms.
+In your `commonMain` source set, define a single, shared `MainServiceLocator` object. This will be
+the central access point for services on all platforms. You should also define a sealed
+`ServiceLocatorScope` to represent your different platform targets.
 
 ```kotlin
-// commonMain/kotlin/com/yourcompany/yourapp/common/locator/AppServiceLocator.kt
+// commonMain/kotlin/com/yourcompany/locator/MainServiceLocator.kt
 
+// A platform-agnostic context class to be implemented on each platform
+expect class PlatformContext
 
-// Define the scopes, typically a sealed interface for multiplatform
+// Define scopes for each platform target
 sealed interface AppScope {
   sealed interface ProductionScope : AppScope
-  data object Android : ProductionScope // Android production
-  data object Ios : ProductionScope // iOS production
-  data object Desktop : ProductionScope // Desktop production
-  data object Testing : AppScope // Test scope
-  // Add others like Web, etc.
+  object Android : ProductionScope
+  object Ios : ProductionScope
+  object Desktop : ProductionScope
+  object Testing : AppScope
+  // Add other platforms as needed
 }
 
-object AppServiceLocator {
+object MainServiceLocator {
   lateinit var instance: SimpleServiceLocator<AppScope>
     private set
 
-  // Register function accessible from platform entry points
-  // Only pass the locator instance; fundamental registrations happen within the locator.
   fun register(
     locator: SimpleServiceLocator<AppScope>,
     context: PlatformContext,
     registrationBlock: SimpleServiceLocator<AppScope>.() -> Unit = {},
   ) {
     if (locator.scope is AppScope.ProductionScope) {
-      check(!::instance.isInitialized) { "Already initialized" }
+      check(!::instance.isInitialized) { "MainServiceLocator is already initialized" }
     }
     instance = locator.apply {
       put<PlatformContext> { context }
@@ -123,250 +82,214 @@ object AppServiceLocator {
     }
   }
 
-  val context
+  // Convenient property to access the registered PlatformContext
+  val context: PlatformContext
     get() = instance.get<PlatformContext>()
 }
 
-// Common delegate for accessing services via the shared locator.
-// This delegate uses getOrProvide() and runs the provided lambda if needed.
+// A common property delegate for accessing services
 inline fun <reified T : Any> serviceLocator(
-  noinline allowedScopes: (AppScope) -> Boolean = { it is AppScope.ProductionScope }, // Default: Production platforms
-  threadSafetyMode: LazyThreadSafetyMode = AppServiceLocator.instance.defaultThreadSafetyMode,
+  noinline allowedScopes: (AppScope) -> Boolean = { it is AppScope.ProductionScope },
+  threadSafetyMode: LazyThreadSafetyMode = MainServiceLocator.instance.defaultThreadSafetyMode,
   noinline provider: (AppScope) -> T,
-): ReadOnlyProperty<Any, T> =
-  ReadOnlyProperty { _: Any, _: T ->
-    AppServiceLocator.instance.getOrProvide(
-      allowedScopes,
-      threadSafetyMode,
-      provider,
-    )
-  }
-
-// Define a platform-agnostic context interface/class in commonMain with platform-specific actual
-// implementations. This will be put() by the platform entry points.
-expect class PlatformContext { // ... defined in commonMain
-  val applicationId: String
+): ReadOnlyProperty<Any, T> = ReadOnlyProperty { _, _ ->
+  MainServiceLocator.instance.getOrProvide(
+    allowedScopes = allowedScopes,
+    threadSafetyMode = threadSafetyMode,
+    provider = provider
+  )
 }
 ```
 
-## 3. Define Services, Expect Factories, and Access Properties in Common Code
+## 3. Define Services and `expect` Factories in Common Code
 
-Define your service interfaces or classes in `commonMain`. For services that require
-platform-specific implementations, define a corresponding `expect` factory function or use `expect`
-class constructors. Critically, define a dedicated access property (like `val instance`) in the
-service's companion object using a delegate that calls `getOrProvide`, and within that delegate's
-provider, call the `expect` mechanism.
+In `commonMain`, define the interfaces or base classes for your services. For each service that
+requires a platform-specific implementation, create a corresponding `expect` factory function.
+
+The recommended pattern is to define a companion object for your service with an `instance` property
+that uses the `serviceLocator` delegate. The provider lambda for the delegate should call the
+`expect` factory function.
 
 ```kotlin
-// commonMain/kotlin/com/yourcompany/yourapp/common/AnalyticsService.kt
-
+// commonMain/kotlin/com/yourcompany/services/AnalyticsService.kt
 interface AnalyticsService {
-  fun trackEvent(name: String, params: Map<String, Any> = emptyMap())
+  fun trackEvent(name: String)
 
   companion object {
-    // Define the single access point for AnalyticsService
-    val instance by serviceLocator() { scope ->
-      println("DEBUG: Creating AnalyticsService for scope: $scope via common provider")
-      createAnalyticsService() // <-- Calls the expect function actualized per platform
-    }
+    // The single access point for this service.
+    // The delegate calls the expect factory to get the platform-specific instance.
+    val instance by serviceLocator { scope -> createAnalyticsService(scope) }
   }
 }
 
-// Define an expect function that the common provider lambda will call
-expect fun createAnalyticsService(): AnalyticsService
-
-// commonMain/kotlin/com/yourcompany/yourapp/common/HttpClient.kt
-
-
-// Assume this is a common interface for an HTTP client
-interface HttpClient {
-  suspend fun get(url: String): String
-
-  companion object {
-    // Define the single access point for HttpClient
-    val instance by serviceLocator() { scope ->
-      println("DEBUG: Creating HttpClient for scope: $scope via common provider")
-      createHttpClient() // <-- Calls the expect function actualized per platform
-    }
-  }
-}
-
-// Define an expect function that the common provider lambda will call
-expect fun createHttpClient(): HttpClient
+// The expect factory function to be implemented on each platform.
+expect fun createAnalyticsService(scope: AppScope): AnalyticsService
 ```
 
-> [!NOTE]
-> As an alternative to defining a common interface and an `expect fun` factory, you could define the
-> service directly as an `expect class` in `commonMain`. The `actual class` in platform source sets
-> would provide the platform-specific implementation. A key benefit of this approach is that *
-*within
-a particular platform source set, code holding a reference of the `expect class` type can directly
-call methods or access properties that are defined *only* on the corresponding `actual class`** (and
-> not necessarily in the `expect class` definition), without needing to cast. This simplifies
-> accessing platform-specific functionality from platform code. Common code, however, is still
-> limited
-> to calling only the members defined in the `expect class` definition (or using `expect fun`
-> extensions).
+> **Alternative: `expect class`**
 >
-> This pattern comes with the trade-off that `expect` classes are generally less flexible than
-> interfaces for defining common behavior that can be implemented in various ways. You will also
-> need
-> separate implementations of the `instance` property, since an `expect class` cannot have
-> implementation in it. See `ProcessSpecificService` in
-> the [multimodule sample](../samples/multimodule).
+> Instead of an interface and an `expect` factory function, you could define an `expect class`. The
+> platform-specific `actual class` would then provide the implementation. This pattern can be useful
+> when you need to call platform-specific methods on an instance from platform-specific code.
+> However,
+> it is generally less flexible than using interfaces.
 
-## 4. Provide Platform-Specific Actual Implementations
+## 4. Provide `actual` Implementations
 
-In each platform source set, provide the `actual` implementations for the services and the `actual`
-implementations for the `expect` factory functions or constructors.
+In each platform-specific source set (e.g., `androidMain`, `iosMain`, `desktopMain`), provide the
+`actual` implementations for your `expect` declarations.
+
+**Android Implementation**
 
 ```kotlin
-// androidMain/kotlin/com/yourcompany/yourapp/android/factories/AnalyticsServiceFactory.android.kt
+// androidMain/kotlin/com/yourcompany/platform/Platform.android.kt
+actual class PlatformContext(val androidContext: Context)
 
-// Android-specific implementation
+// androidMain/kotlin/com/yourcompany/services/AnalyticsService.android.kt
 class AndroidAnalyticsService(private val context: Context) : AnalyticsService {
-  override fun trackEvent(name: String, params: Map<String, Any>) {
-    Log.d("Analytics", "Android Tracking Event: $name with params $params")
-    // Use platform-specific analytics SDK here
+  override fun trackEvent(name: String) {
+    Log.d("Analytics", "Event: $name")
   }
 }
 
-// Provide the actual implementation for the expect factory
 actual fun createAnalyticsService(scope: AppScope): AnalyticsService {
-  // Create and return the Android-specific implementation
-  return AndroidAnalyticsService(AppServiceLocator.context.androidContext)
+  val platformContext = MainServiceLocator.context
+  return AndroidAnalyticsService(platformContext.androidContext)
+}
+```
+
+**iOS Implementation**
+
+```kotlin
+// iosMain/kotlin/com/yourcompany/platform/Platform.ios.kt
+actual class PlatformContext(val deviceName: String)
+
+// iosMain/kotlin/com/yourcompany/services/AnalyticsService.ios.kt
+class IosAnalyticsService(private val deviceName: String) : AnalyticsService {
+  override fun trackEvent(name: String) {
+    println("iOS Event on $deviceName: $name")
+  }
 }
 
-// desktopMain/kotlin/com/yourcompany/yourapp/desktop/factories/AnalyticsServiceFactory.desktop.kt
+actual fun createAnalyticsService(scope: AppScope): AnalyticsService {
+  val platformContext = MainServiceLocator.context
+  return IosAnalyticsService(platformContext.deviceName)
+}
+```
 
-// Desktop-specific implementation
+**Desktop Implementation**
+
+```kotlin
+// desktopMain/kotlin/com/yourcompany/platform/Platform.desktop.kt
+actual class PlatformContext(val appName: String)
+
+// desktopMain/kotlin/com/yourcompany/services/AnalyticsService.desktop.kt
 class DesktopAnalyticsService : AnalyticsService {
-  override fun trackEvent(name: String, params: Map<String, Any>) {
-    println("Desktop Tracking Event: $name with params $params")
-    // Use desktop-specific logging or analytics here
+  override fun trackEvent(name: String) {
+    println("Desktop Event: $name")
   }
 }
 
-// Provide the actual implementation for the expect factory
 actual fun createAnalyticsService(scope: AppScope): AnalyticsService {
-  // Create and return the Desktop-specific implementation
   return DesktopAnalyticsService()
 }
-
-// ... (Similar actual implementations for HttpClient and its factory)
 ```
 
-## 5. Initialize and Register Fundamental Platform Needs
+## 5. Initialize the Locator in Each Platform's Entry Point
 
-In each platform's main entry point, create a `SimpleServiceLocator` instance with the appropriate
-platform scope and pass *only* this locator instance to the shared `AppServiceLocator.register`
-function. Then, use `put` on this locator instance to register any fundamental, platform-specific
-*values* or services that are needed *by the common providers or actual factories*. The
-`PlatformContext` wrapper is the most common example here.
+In each platform's entry point, create and register a `SimpleServiceLocator` with the appropriate
+scope and `PlatformContext`. The `registrationBlock` is the ideal place to provide any other
+platform-specific dependencies that your `actual` factories might need to retrieve.
+
+**Android (`Application.onCreate`)**
 
 ```kotlin
-// androidApp/src/main/java/com/yourcompany/yourapp/android/App.kt (Android Application class)
-
 class App : Application() {
   override fun onCreate() {
     super.onCreate()
-    val locator = SimpleServiceLocator(ServiceLocatorScope.Android)
-    AppServiceLocator.register(locator, PlatformContext(this)) {
-      // Use the locator instance to put platform fundamentals needed by common providers/actuals
-
-      put<OkHttpClient> { OkHttpClient() } // Put platform-specific dependencies needed by actuals/common providers
+    MainServiceLocator.register(
+      SimpleServiceLocator(AppScope.Android),
+      PlatformContext(this)
+    ) {
+      // Register platform-specific dependencies needed by actual factories.
+      // For example, an OkHttpClient for networking.
+      put<OkHttpClient> { OkHttpClient() }
     }
   }
 }
-
-// desktopApp/src/main/kotlin/com/yourcompany/yourapp/desktop/main.kt (Desktop main function)
-
-fun main() {
-  val locator = SimpleServiceLocator(ServiceLocatorScope.Desktop)
-  AppServiceLocator.register(locator, PlatformContext("com.yourcompany.yourapp.desktop")) {
-    // Use the locator instance to put platform fundamentals needed by common providers/actuals
-
-    put<ApacheHttpClient> { ApacheHttpClient() } // Put platform-specific dependencies needed by actuals/common providers
-  }
-  // ... start your desktop UI
-}
 ```
 
-## 6. Access Services in Common Code
-
-Your common code accesses services defined in `commonMain` through their dedicated access
-properties (e.g., `val instance`) which use a delegate calling `getOrProvide()`. The provider lambda
-within this delegate calls the `expect` factory function to obtain the platform-specific instance.
+**iOS (e.g., `AppDelegate` or SwiftUI `App` init)**
 
 ```kotlin
-// commonMain/kotlin/com/yourcompany/yourapp/common/BusinessLogic.kt
-
-object BusinessLogic {
-
-  // The PlatformContext wrapper is registered in the common AppServiceLocator registration block
-  // and exposed directly.
-  private val platformContext: PlatformContext = AppServiceLocator.context
-
-
-  fun performUserAction() {
-    // Use the services obtained via their instance properties.
-    // Accessing these properties triggers the lazy getOrProvide() call via the delegate.
-    AnalyticsService.instance.trackEvent("user_action", mapOf("feature" to "xyz"))
-    val response = HttpClient.instance.get("https://example.com/api/data")
-    println(response)
-
-    // Use the platform context wrapper if needed
-    println("Running on platform: ${platformContext.platformName}")
+fun initMapSL() {
+  MainServiceLocator.register(
+    SimpleServiceLocator(AppScope.Ios),
+    PlatformContext(UIDevice.currentDevice.name)
+  ) {
+    // Register iOS-specific dependencies, e.g., a networking client.
+    put<SomeIosHttpEngine> { SomeIosHttpEngine() }
   }
 }
 ```
 
-In this preferred pattern:
+**Desktop (`main` function)**
 
-- Common code defines the service interface, an `expect` factory, and a lazy `instance` property
-  using a `getOrProvide` delegate.
-- Platform source sets provide the `actual` service implementation and the `actual` factory
-  implementation (which may get platform fundamentals from the locator).
-- The provider lambda in the common delegate calls the `expect` factory.
-- The platform entry points primarily register fundamental platform-specific *values* or services
-  needed by common providers/actuals using `put`.
-- Consumers access services solely via their common `instance` properties.
+```kotlin
+fun main() {
+  MainServiceLocator.register(
+    SimpleServiceLocator(AppScope.Desktop),
+    PlatformContext("MyDesktopApp")
+  ) {
+    // Register Desktop-specific dependencies.
+    put<ApacheHttpEngine> { ApacheHttpEngine() }
+  }
+  // ... start desktop UI
+}
+```
 
-This approach keeps the logic for creating platform-specific implementations tied to the `expect`/
-`actual` mechanism called from the common provider, aligning well with the lazy `getOrProvide`
-pattern and promoting encapsulation.
+## 6. Access Services from Common Code
+
+Your common code can now access any service through its `instance` property, and the correct
+platform-specific implementation will be lazily provided at runtime.
+
+```kotlin
+// commonMain/kotlin/com/yourcompany/common/BusinessLogic.kt
+class BusinessLogic {
+  fun onUserLogin() {
+    // Accessing .instance triggers the lazy creation via the expect factory
+    AnalyticsService.instance.trackEvent("user_login")
+  }
+}
+```
 
 ## 7. Testing Multiplatform Code
 
-Testing multiplatform code that uses this pattern with MapSL follows the standard testing guide
-patterns, with specific considerations for `expect`/`actual`.
+Testing multiplatform code that uses this pattern follows the standard testing guides, with specific
+considerations for `expect`/`actual`.
 
-- **commonTest:** When running tests in `commonTest` with a testing locator, if a service accessed
-  via its `instance` property (using the `getOrProvide` delegate) is not explicitly registered with
-  `put` in the test setup:
-    - The testing locator's `onMiss` or `onInvalidScope` handler runs, providing a default mock (
-      from `createMock`).
-    - The provider lambda within the delegate is **not** executed in this case since the testing
-      locator provides the mock without calling the provider.
-- **platformTest:** When running tests on a specific platform with a testing locator, the `expect`
-  factory calls in common providers will resolve to the `actual` implementation for that platform in
-  `platformTest`. You can then register specific mocks or fakes for dependencies *needed by that
-  actual factory* using `put` in the platform test setup. The testing locator's `createMock` in
-  `platformTest` can also be implemented using a platform-specific mocking library.
+- **`commonTest`**: When running tests in `commonTest` with a testing locator, if a service accessed
+  via its `instance` property is not explicitly registered with `put`, the testing locator's
+  `onMiss` or `onInvalidScope` handler runs, providing a default mock. The `expect` factory function
+  in the `serviceLocator` delegate is **not** executed in this case.
 
-Your multiplatform testing module can define common testing utilities like a shared
-`TestServiceLocator` structure and potentially `expect`/`actual` factories for creating test
-fakes/mocks, mirroring the production code structure.
+- **Platform-Specific Tests (`androidTest`, `desktopTest`)**: When running tests on a specific
+  platform, calls to the `expect` factory will resolve to the `actual` implementation for that
+  platform. This allows you to test the integration between your common code and the
+  platform-specific service implementation. You can register specific fakes or mocks for any
+  dependencies required by that `actual` factory.
+
+Your multiplatform testing module can define common testing utilities, such as a shared
+`TestServiceLocator` and `expect`/`actual` factories for creating test fakes/mocks, mirroring the
+production code structure.
 
 ## Conclusion
 
-Combining MapSL's `getOrProvide` mechanism with Kotlin's `expect`/`actual` declarations and an
-encapsulated access pattern provides a robust solution for managing platform-specific dependencies
-in KMP. By defining service contracts and `expect` factories in `commonMain` and accessing them via
-lazy `instance` properties using `getOrProvide` delegates, you keep your common code clean while the
-runtime platform correctly resolves to the appropriate `actual` implementation. Platform entry
-points then focus on registering fundamental platform components needed by the common providers or
-actual factories.
+Combining MapSL's `getOrProvide` mechanism with Kotlin's `expect`/`actual` declarations provides a
+robust and clean solution for managing platform-specific dependencies in KMP. By defining service
+contracts and `expect` factories in `commonMain` and accessing them via lazy `instance` properties,
+you keep your common code decoupled from platform specifics while the runtime correctly resolves to
+the appropriate `actual` implementation.
 
 For a starting point demonstrating multiplatform structure, explore
 the [multimodule sample](../samples/multimodule).

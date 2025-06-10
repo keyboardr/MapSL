@@ -5,6 +5,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import com.keyboardr.mapsl.ExperimentalKeyType
 import com.keyboardr.mapsl.ServiceLocator
+import com.keyboardr.mapsl.keys.LazyKey
 import com.keyboardr.mapsl.keys.LazyKey.Companion.defaultLazyKeyThreadSafetyMode
 import com.keyboardr.mapsl.keys.ServiceEntry
 import com.keyboardr.mapsl.keys.ServiceKey
@@ -12,14 +13,20 @@ import kotlin.concurrent.Volatile
 import kotlin.reflect.KClass
 
 /**
- * A key similar to [LazyKey][com.keyboardr.mapsl.keys.LazyKey], but which will clear its
- * value when outside the getters' lifecycles. When fetching a value, a [LifecycleOwner] must be
- * provided to define the scope. When all of the get calls have had their [LifecycleOwner] go below
- * the minimum [Lifecycle.State] that the key was registered with  ([Lifecycle.State.STARTED] by
- * default), the current value is forgotten and the provider will be invoked the next time a value
- * is requested.
+ * A [ServiceKey] that ties the lifetime of a service instance to one or more
+ * AndroidX [LifecycleOwner]s.
  *
- * It is an error to request a value using a [LifecycleOwner] that is not above the minimum state.
+ * The service is created lazily, similar to a [LazyKey]. However, when retrieving the service,
+ * a [LifecycleOwner] must be provided. The service instance is retained by the locator as long as
+ * at least one of the `LifecycleOwner`s used to retrieve it is active (i.e., its state is at or
+ * above the specified [PutParams.minimumState]).
+ *
+ * Once all associated `LifecycleOwner`s become inactive (i.e., their state drops below the
+ * `minimumState`), the service instance is discarded. A new instance will be created on the
+ * next request with an active `LifecycleOwner`.
+ *
+ * It is an error to request a value using a `LifecycleOwner` that is not in at least the
+ * `minimumState`.
  */
 @ExperimentalKeyType
 public class LifecycleKey<T : Any>(override val type: KClass<T>) :
@@ -35,12 +42,27 @@ public class LifecycleKey<T : Any>(override val type: KClass<T>) :
     return (entry as Entry<T>).getValue(params)
   }
 
+  /**
+   * Parameters required to register a [LifecycleKey].
+   *
+   * @param minimumState The minimum [Lifecycle.State] that a `LifecycleOwner` must be in for the
+   * service instance to be retained. Defaults to [Lifecycle.State.STARTED].
+   * @param threadSafetyMode The [LazyThreadSafetyMode] for the service's lazy initialization.
+   * @param provider A lambda that creates the service instance.
+   */
   public data class PutParams<T>(
     val minimumState: Lifecycle.State = Lifecycle.State.STARTED,
     val threadSafetyMode: LazyThreadSafetyMode,
     val provider: () -> T,
   )
 
+  /**
+   * The [ServiceEntry] for a [LifecycleKey].
+   *
+   * This entry tracks the set of active `LifecycleOwner`s that have requested the service.
+   * It observes their lifecycles and clears the stored service instance when all owners
+   * become inactive.
+   */
   public class Entry<T>(private val params: PutParams<T>) : ServiceEntry<T> {
     private val lifecycles = mutableSetOf<LifecycleOwner>()
 
@@ -75,11 +97,13 @@ public class LifecycleKey<T : Any>(override val type: KClass<T>) :
 }
 
 /**
- * Registers a service in the [ServiceLocator] for the specified [key]. It is an error to register
- * a [key] more than once in the same [ServiceLocator].
+ * Registers a lifecycle-aware service provider for the given [key].
  *
- * @param minimumState The lowest state services should be kept for. When all lifecycles used for
- * reading values are below this state, the value is forgotten.
+ * @param key The [LifecycleKey] to associate with the provider.
+ * @param minimumState The lowest state the [LifecycleOwner] should be in for the service to be
+ * retained. Defaults to [Lifecycle.State.STARTED].
+ * @param threadSafetyMode The thread safety mode for the lazy initialization.
+ * @param provider A lambda that creates the service instance.
  */
 @ExperimentalKeyType
 public fun <T : Any> ServiceLocator.put(
@@ -92,14 +116,7 @@ public fun <T : Any> ServiceLocator.put(
 }
 
 /**
- * A key similar to [LazyKey][com.keyboardr.mapsl.keys.LazyKey], but which will clear its
- * value when outside the getters' lifecycles. When fetching a value, a [LifecycleOwner] must be
- * provided to define the scope. When all of the get calls have had their [LifecycleOwner] go below
- * the minimum [Lifecycle.State] that the key was registered with  ([Lifecycle.State.STARTED] by
- * default), the current value is forgotten and the provider will be invoked the next time a value
- * is requested.
- *
- * It is an error to request a value using a [LifecycleOwner] that is not above the minimum state.
+ * Creates a [LifecycleKey] for the reified type `T`.
  */
 @ExperimentalKeyType
 public inline fun <reified T : Any> LifecycleKey(): LifecycleKey<T> = LifecycleKey<T>(T::class)

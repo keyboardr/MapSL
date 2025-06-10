@@ -4,16 +4,28 @@ import com.keyboardr.mapsl.SimpleServiceLocator
 import com.keyboardr.mapsl.simple.scaffold.MainServiceLocator.register
 
 /**
- * Holds the main [SimpleServiceLocator] for the application.
+ * Holds the pre-configured, application-wide [SimpleServiceLocator] instance.
  *
- * [register] should be called exactly once at the start of the application. On Android, this is
- * already done for you via ServiceLocatorInitializer. You can disable this by following
- * [these instructions](https://developer.android.com/topic/libraries/app-startup#disable-individual).
+ * This object is the central access point for all services when using the `simple-scaffold`.
+ *
+ * On Android, this locator is initialized automatically on app startup. If you need to customize
+ * the initialization process, you must first disable the automatic initializer.
+ * @see [register]
  */
 public object MainServiceLocator {
   public lateinit var instance: SimpleServiceLocator<ServiceLocatorScope>
     private set
 
+  /**
+   * Initializes or replaces the `MainServiceLocator` instance.
+   *
+   * This should typically only be called once at application startup. On Android, this is handled
+   * automatically by [ServiceLocatorInitializer]. If you need to perform manual registration
+   * (e.g., to pre-register services at startup), you must first disable the automatic
+   * initializer to avoid conflicts.
+   *
+   * @see [Disable automatic initialization](https://developer.android.com/topic/libraries/app-startup#disable-individual)
+   */
   public fun register(
     serviceLocator: SimpleServiceLocator<ServiceLocatorScope>,
     registrationBlock: SimpleServiceLocator<ServiceLocatorScope>.() -> Unit = {},
@@ -46,15 +58,20 @@ public object MainServiceLocator {
 internal interface PreRegistered
 
 /**
- * Indicates which scope the [MainServiceLocator] was registered in.
+ * Defines the environments for the `simple-scaffold`.
  */
 public enum class ServiceLocatorScope {
-  Production, Testing
+  /** The scope for a standard application runtime environment. */
+  Production,
+  /** The scope for a test runtime environment. */
+  Testing
 }
 
 
 /**
- * Provides services in production environments
+ * Fetches a service from the locator, creating and storing it if it doesn't already exist.
+ * This provider is only active in the `Production` scope.
+ *
  * @see SimpleServiceLocator.getOrProvide
  */
 public inline fun <reified T : Any> SimpleServiceLocator<ServiceLocatorScope>.getOrProvide(

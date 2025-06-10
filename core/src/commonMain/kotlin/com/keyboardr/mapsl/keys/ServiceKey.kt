@@ -1,17 +1,17 @@
 package com.keyboardr.mapsl.keys
 
+import com.keyboardr.mapsl.ServiceLocator
 import kotlin.reflect.KClass
 
 /**
- * A Key type used in [ServiceLocator][com.keyboardr.mapsl.ServiceLocator]. Will provide
- * values of type [T].
+ * A Key type used in a [ServiceLocator]. Will provide values of type [T].
  *
- * @param T the type of values provided by this key
- * @param Entry the [ServiceEntry] type used by this key
- * @param GetParams the type used by the key when requesting a value. Commonly this is [Unit] for
- * keys that do not require parameters when requesting a value.
- * @param PutParams the type used by the key when creating an [Entry]. This includes the necessary
- * information for obtaining values.
+ * @param T The type of value provided by this key.
+ * @param Entry The [ServiceEntry] type this key creates and uses.
+ * @param GetParams The type of parameters required when retrieving a value with this key (e.g., via `get()`).
+ * This is often [Unit] for keys that do not require parameters.
+ * @param PutParams The type of parameters required when registering a value with this key (e.g., via `put()`).
+ * This typically includes the service instance itself or a provider lambda.
  */
 public interface ServiceKey<T : Any, Entry : ServiceEntry<T>, GetParams, PutParams> {
   /**
@@ -33,16 +33,21 @@ public interface ServiceKey<T : Any, Entry : ServiceEntry<T>, GetParams, PutPara
 }
 
 /**
- * An entry to be stored in a [ServiceLocator][com.keyboardr.mapsl.ServiceLocator] to provide values
- * of type [T]
+ * An entry stored in a [ServiceLocator] to provide a value of type [T].
+ *
+ * The specific implementation of `ServiceEntry` is what defines a key's behavior
+ * (e.g., whether it holds a direct instance, a lazy provider, or a factory function).
  */
 public interface ServiceEntry<T>
 
 /**
- * Used by [LazyKey] and [SingletonKey] so that they can get values from each other's
- * [ServiceEntry], which is a trait needed by [ClassKey].
+ * An internal interface that provides a common contract for entries that do not require
+ * parameters for value retrieval, such as those created by [LazyKey] and [SingletonKey].
+ *
+ * This abstraction is what allows a [ClassKey] to seamlessly resolve an entry created
+ * by either a `LazyKey` or a `SingletonKey`, as it can access the underlying `service`
+ * property on both.
  */
 internal interface ParamlessServiceEntry<T> : ServiceEntry<T> {
   val service: T
 }
-

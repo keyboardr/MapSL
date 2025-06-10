@@ -5,9 +5,12 @@ import kotlin.concurrent.Volatile
 import kotlin.reflect.KClass
 
 /**
- * A [ServiceKey] that loads services lazily. The [PutParams.provider] will be
- * invoked the first time the ServiceLocator is queried for the key's value. The multi-thread
- * behavior depends on [PutParams.threadSafetyMode].
+ * A [ServiceKey] for services that are created and stored lazily.
+ *
+ * The [provider][PutParams.provider] lambda is executed only the first time a value for this key
+ * is requested from the [ServiceLocator]. The resulting instance is then stored and returned for
+ * all subsequent requests for the same key. The multi-thread initialization behavior is determined
+ * by the [LazyThreadSafetyMode].
  */
 public open class LazyKey<T : Any>(override val type: KClass<T>) :
   ServiceKey<T, LazyKey<T>.Entry<T>, Unit, LazyKey.PutParams<T>> {
@@ -24,6 +27,13 @@ public open class LazyKey<T : Any>(override val type: KClass<T>) :
     public val threadSafetyMode: LazyThreadSafetyMode,
   )
 
+  /**
+   * The [ServiceEntry] for a [LazyKey]. It holds the provider lambda and the created service.
+   *
+   * It includes a check for circular dependencies. If this entry is re-entered while its
+   * own `service` is being initialized, it indicates a dependency loop, which will
+   * result in an [IllegalStateException].
+   */
   public inner class Entry<T : Any>(
     loader: () -> T,
     threadSafetyMode: LazyThreadSafetyMode,
@@ -78,8 +88,16 @@ private fun ServiceLocator.getDefaultParams() =
   getOrProvideValue(DefaultParams.key, Unit) { DefaultParams() }
 
 /**
- * Registers a provider for [key]. [provider] will be invoked the first time a value is
- * requested for [key]. The multi-thread behavior depends on [threadSafetyMode].
+ * Registers a lazy singleton provider for the given [key].
+ *
+ * The [provider] lambda will be invoked only the first time a value is requested for this [key].
+ * The created instance will be stored and reused for all subsequent requests.
+ *
+ * The multi-thread behavior of the initialization is determined by [threadSafetyMode].
+ *
+ * @param key The [LazyKey] to associate with the provider.
+ * @param threadSafetyMode The [LazyThreadSafetyMode] for the initialization.
+ * @param provider A lambda that creates the service instance.
  */
 public fun <T : Any> ServiceLocator.put(
   key: LazyKey<T>,

@@ -1,17 +1,25 @@
 # Key Kinds
 
+> **Note:** This guide is primarily for users of the `core` and `scoped` modules. If you are using
+> the `simple` or `simple-scaffold` modules, you do not need to work with explicit key kinds, as
+> they
+> are handled for you automatically under the hood.
+
 MapSL uses the concept of **Keys** to manage and access services within a `ServiceLocator`. A key
 acts as a unique identifier for a specific service or a specific way of providing a service.
 Different types, or "kinds," of keys offer different behaviors regarding when the service is created
 and how long its instance is kept.
 
-This document explains how to use the built-in key types provided by MapSL's `core` and `lifecycle`
-modules. You'll typically use these with a `ServiceLocator` instance, often a `ScopedServiceLocator`
-from the `scoped` module.
+This document explains the built-in key types provided by MapSL's `core` and `lifecycle` modules.
 
-## Key Concepts: Key Kind and Service Type
+## How Keys Work: Core Concepts
 
-When working with MapSL keys, it's helpful to distinguish between two things:
+Before diving into the specific key kinds, it's important to understand the fundamental components
+that make them work.
+
+### Key Kind vs. Service Type
+
+To avoid ambiguity, this document uses the following terminology:
 
 1. **Key Kind:** This refers to the class of the key itself (e.g., `LazyKey`, `SingletonKey`,
    `FactoryKey`). The key kind determines *how* the service is managed (when it's created, if
@@ -20,14 +28,50 @@ When working with MapSL keys, it's helpful to distinguish between two things:
    provides (e.g., `MyService`, `DatabaseConnectionManager`). This is specified using generics when
    you create or refer to a key (e.g., `LazyKey<MyService>`).
 
-When you interact with a `ServiceLocator`, you use a specific key *instance* (or, in the case of
-`ClassKey`, the service *type*) to either `put` (register) a service provider or instance, or
-`get` (retrieve) the service instance.
+### Keys and Entries
 
-Here's a quick overview of the built-in key kinds:
+When you register a key with a `ServiceLocator`, the key's `createEntry()` function is called to
+create a **`ServiceEntry`**. This entry is what gets stored in the `ServiceLocator`'s internal map.
+The entry holds the information needed to provide the service instance later.
+
+Different key kinds use different `ServiceEntry` implementations to produce their unique behaviors.
+For example:
+
+- A `LazyKey` creates an entry that holds a provider lambda, which is only executed upon the first
+  request.
+
+- A `SingletonKey` creates an entry that holds the already-created service instance.
+
+- A `FactoryKey` creates an entry that holds a factory function to be called on every request.
+
+This `Key`/`Entry` mechanism is the core of MapSL's flexibility and allows for custom behaviors to
+be defined by creating new `ServiceKey` implementations.
+
+### Parameters (`GetParams` and `PutParams`)
+
+Each `ServiceKey` defines two generic parameter types that control how you interact with it:
+
+- **`PutParams`**: The type of parameters required when you **register** a service with the key (
+  i.e., when you call `put()`). This typically includes the service instance or a provider function.
+
+- **`GetParams`**: The type of parameters required when you **retrieve** a service with the key (
+  i.e., when you call `get()`). For most simple keys, this is `Unit` because no extra parameters are
+  needed for retrieval. For others, like `FactoryKey` or `LifecycleKey`, you may need to provide
+  specific parameters.
+
+### Experimental Keys
+
+Some key kinds are marked as **experimental** with the `@ExperimentalKeyType` annotation. This does
+not indicate any known issues. It simply means their usage patterns are still being evaluated. They
+are generally safe for production use, but their API may be refined in future releases based on user
+feedback.
+
+## Overview of Built-in Key Kinds
+
+Here's a quick summary of the key kinds available in MapSL:
 
 | Key Kind                                  | Value Creation                                                     | Value Lifetime                                                              | Key Equivalence       | GetParams        | Main PutParams     | Module      |
-|:------------------------------------------|:-------------------------------------------------------------------|:----------------------------------------------------------------------------|:----------------------|:-----------------|:-------------------|:------------|
+|-------------------------------------------|--------------------------------------------------------------------|-----------------------------------------------------------------------------|-----------------------|------------------|--------------------|-------------|
 | `LazyKey<T>`                              | Created the first time it is requested                             | Stored indefinitely                                                         | Specific key instance | `Unit`           | `() -> T`          | `core`      |
 | `SingletonKey<T>`                         | Provided when the key is registered                                | Stored indefinitely                                                         | Specific key instance | `Unit`           | `T`                | `core`      |
 | `ClassKey<T>`                             | Can be either Lazy or Singleton, depending on registration method  | Stored indefinitely                                                         | Same reifiable `T`    | `Unit`           | `() -> T` or `T`   | `core`      |
@@ -36,8 +80,6 @@ Here's a quick overview of the built-in key kinds:
 
 You can also declare your own key types to customize behavior. This is beyond the scope of this
 document, but see the documentation for `ServiceKey<T>` for more details.
-
-Let's explore each key kind in detail:
 
 > [!Note]
 > The examples below show usage with a `serviceLocator` declared in local scope, using separate
@@ -219,50 +261,36 @@ instance will be created.
   state. Discarded when all drop below the minimum state.
 - **Key Equivalence:** Based on the specific `LifecycleKey` instance.
 - **Experimental:** This key type is marked with `@ExperimentalKeyType`. Its API is subject to
-  change. Requires the `com.keyboardr.mapsl:lifecycle` module dependency.
+  change.
+- Requires The `com.keyboardr.mapsl:lifecycle` module dependency.
 
 ```kotlin
 // Requires adding the 'com.keyboardr.mapsl:lifecycle' dependency.
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.Lifecycle
-import com.keyboardr.mapsl.lifecycle.LifecycleKey
 import com.keyboardr.mapsl.lifecycle.put // Import the put extension for LifecycleKey
-
-class LifecycleAwareService {
-  init {
-    println("LifecycleAwareService created")
-  }
-
-  fun doSomething() {
-    println("LifecycleAwareService doing something")
-  }
-}
 
 // 1. Declare a LifecycleKey instance
 val lifecycleServiceKey = LifecycleKey<LifecycleAwareService>()
 
-// --- Registration ---
-// In your ServiceLocator registration block:
+// 2. Register the service provider with the key
 // Provide a lambda that creates the service. You can optionally set a minimumState
 // and threadSafetyMode here.
 serviceLocator.put(lifecycleServiceKey) {
   LifecycleAwareService()
 }
 
-// --- Retrieval ---
+// 3. Retrieve the service instance using the key
 // In your Activity or Fragment (which implements LifecycleOwner):
 class MyActivity : AppCompatActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-    // 2. You MUST provide a LifecycleOwner when getting the service
+    // You MUST provide a LifecycleOwner when getting the service
     val service: LifecycleAwareService = serviceLocator.get(lifecycleServiceKey, this)
     service.doSomething()
 
-    // If this activity is backgrounded and then foregrounded again, and no other
-    // LifecycleOwner was holding a reference with this key, the next time
-    // serviceLocator.get(lifecycleServiceKey, this) is called (e.g., in onResume),
-    // a *new* LifecycleAwareService instance will be created.
+    // If this activity is backgrounded and then foregrounded again, and the lifecycles
+    // of all other owners that had requested this service have also become inactive,
+    // a *new* LifecycleAwareService instance will be created on the next request.
   }
 }
 ```
@@ -288,5 +316,4 @@ management needs of your service:
 - For services whose lifetime should follow an AndroidX `LifecycleOwner`: **`LifecycleKey`**.
 
 By understanding these distinctions and how to use each key type's `put` and `get` methods, you can
-effectively manage dependencies with MapSL's core modules. Remember to add the necessary module
-dependencies (`core`, `scoped`, and `lifecycle` if needed) to your project.
+effectively manage dependencies with the `core` and `lifecycle` modules.
