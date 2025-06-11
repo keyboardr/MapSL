@@ -2,6 +2,7 @@
 
 package com.keyboardr.mapsl
 
+import androidx.annotation.RestrictTo
 import com.keyboardr.mapsl.keys.ClassKey
 import com.keyboardr.mapsl.keys.FactoryKey
 import com.keyboardr.mapsl.keys.LazyKey
@@ -47,6 +48,9 @@ public abstract class ServiceLocator(private val allowReregister: Boolean = fals
    * By default, it is an error to register a [key] more than once in the same [ServiceLocator].
    * This behavior can be changed by setting `allowReregister` to `true` in the constructor,
    * in which case subsequent registrations will overwrite previous ones.
+   *
+   * @param key The [ServiceKey] to associate associate with the provided params.
+   * @param params The parameters used to create a new [ServiceEntry] for [key].
    */
   public fun <T : Any, PutParams> put(
     key: ServiceKey<T, *, *, PutParams>,
@@ -58,8 +62,10 @@ public abstract class ServiceLocator(private val allowReregister: Boolean = fals
   }
 
   /**
-   * Called when no entry is found for the specified [key] to decide what should be returned.
-   * Override to customize this behavior. Throws a [ServiceLocatorException] by default.
+   * Called when [get] is called for a specified [key] that has no registered provider.
+   *
+   * The default behavior is to throw an [IllegalArgumentException]. Subclasses can override this
+   * to provide a different fallback mechanism.
    */
   protected open fun <T : Any, GetParams> onMiss(
     key: ServiceKey<T, *, GetParams, *>,
@@ -68,15 +74,14 @@ public abstract class ServiceLocator(private val allowReregister: Boolean = fals
     throw ServiceLocatorException("No value found for key: $key", key)
 
   /**
-   * Fetches an item for [key]. If the [key] was not previously registered, returns the result of
-   * [onMiss].
+   * Fetches an item for [key]. If no provider has been registered, this will delegate to [onMiss].
    */
   public fun <T : Any, GetParams> get(key: ServiceKey<T, *, GetParams, *>, params: GetParams): T =
     getOrNull(key, params) ?: onMiss(key, params)
 
   /**
-   * Fetches the item for [key]. If the [key] was not previously registered, returns `null`. Does
-   * not invoke [onMiss].
+   * Fetches the item for [key]. If no provider has been registered, returns `null`. Does not
+   * invoke [onMiss].
    */
   @Suppress("UNCHECKED_CAST")
   public fun <T : Any, GetParams> getOrNull(
@@ -89,6 +94,7 @@ public abstract class ServiceLocator(private val allowReregister: Boolean = fals
    * Fetches the [ServiceEntry] previously stored using [key]. If no entry was registered for [key],
    * creates a new entry and stores it.
    */
+  @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
   protected fun <T : Any> getOrProvideEntry(
     key: Key<T>,
     entryProvider: () -> ServiceEntry<T>,
@@ -98,8 +104,9 @@ public abstract class ServiceLocator(private val allowReregister: Boolean = fals
   }
 
   /**
-   * Fetches the value previously stored for [key]. If no value was registered for [key], creates a
-   * new entry and stores it.
+   * Fetches an item for the given [key].
+   *
+   * If the key has not been previously registered, creates a new entry and stores it.
    *
    * This function is internal since users of the library should generally use the `getOrProvide`
    * from `ScopedServiceLocator`. This is only made available for library components to store
@@ -129,14 +136,13 @@ public abstract class ServiceLocator(private val allowReregister: Boolean = fals
 }
 
 /**
- * Fetches an item for [key]. If the [key] was not previously registered, returns the result of
- * [ServiceLocator.onMiss].
+ * Fetches an item for [key]. If no provider has been registered, this will delegate to [ServiceLocator.onMiss].
  */
 public fun <T : Any> ServiceLocator.get(key: ServiceKey<T, *, Unit, *>): T = get(key, Unit)
 
 /**
- * Fetches the item for [key]. If the [key] was not previously registered, returns `null`. Does
- * not invoke [ServiceLocator.onMiss].
+ * Fetches the item for [key]. If no provider has been registered, returns `null`. Does not
+ * invoke [ServiceLocator.onMiss].
  */
 public fun <T : Any> ServiceLocator.getOrNull(key: ServiceKey<T, *, Unit, *>): T? =
   getOrNull(key, Unit)

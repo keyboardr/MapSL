@@ -15,7 +15,8 @@ import kotlin.reflect.KClass
  *
  * @param S The type of the scope identifier.
  * @param scope The specific scope instance for this locator.
- * @param allowReregister If true, allows keys to be registered multiple times.
+ * @param allowReregister if true, allow registering keys multiple times. The latest registration
+ * will be used. This should generally only be true for tests.
  */
 public open class SimpleServiceLocator<out S>(scope: S, allowReregister: Boolean = false) {
   private val backingServiceLocator = object : ScopedServiceLocator<S>(scope, allowReregister) {
@@ -61,7 +62,11 @@ public open class SimpleServiceLocator<out S>(scope: S, allowReregister: Boolean
    * The [provider] lambda will be invoked only the first time a value is requested for this `key`.
    * The resulting instance is then stored and returned for all subsequent requests.
    *
-   * By default, it is an error to register the same `key` more than once.
+   * By default, it is an error to register the same `key` more than once. This behavior can be
+   * changed by setting `allowReregister` to `true` in the constructor, in which case subsequent
+   * registrations will overwrite previous ones.
+   *
+   * The multi-thread behavior depends on [threadSafetyMode].
    *
    * @param key The [KClass] to associate with the provider.
    * @param threadSafetyMode The thread safety mode for the lazy initialization.
@@ -78,8 +83,16 @@ public open class SimpleServiceLocator<out S>(scope: S, allowReregister: Boolean
   /**
    * Registers a lazy singleton provider for the reified type [T].
    *
+   * The [provider] lambda will be invoked only the first time a value is requested for this `key`.
+   * The resulting instance is then stored and returned for all subsequent requests.
+   *
+   * By default, it is an error to register the same `key` more than once. This behavior can be
+   * changed by setting `allowReregister` to `true` in the constructor, in which case subsequent
+   * registrations will overwrite previous ones.
+   *
+   * The multi-thread behavior depends on [threadSafetyMode].
+   *
    * This is a convenience function that is equivalent to calling [put] with `T::class` as the key.
-   * By default, it is an error to register the same type `T` more than once.
    *
    * @param T The service type to register.
    * @param threadSafetyMode The thread safety mode for the lazy initialization.
@@ -93,27 +106,27 @@ public open class SimpleServiceLocator<out S>(scope: S, allowReregister: Boolean
   }
 
   /**
-   * Fetches the singleton instance for the given class [key]. If the service was not previously
-   * registered, this will delegate to [onMiss].
+   * Fetches the singleton instance for the given class [key]. If no provider has been registered,
+   * this will delegate to [onMiss].
    */
   public fun <T : Any> get(key: KClass<T>): T = backingServiceLocator.get(LazyClassKey(key))
 
   /**
-   * Fetches the singleton instance for the reified type [T]. If the service was not previously
-   * registered, this will delegate to [onMiss].
+   * Fetches the singleton instance for the reified type [T]. If no provider has been registered,
+   * this will delegate to [onMiss].
    */
   public inline fun <reified T : Any> get(): T = get(T::class)
 
   /**
-   * Fetches the singleton instance for the given class [key]. If the service was not previously
-   * registered, this returns `null` and does not invoke [onMiss].
+   * Fetches the singleton instance for the given class [key]. If no provider has been registered,
+   * returns `null`. Does not invoke `onMiss`.
    */
   public fun <T : Any> getOrNull(key: KClass<T>): T? =
     backingServiceLocator.getOrNull(LazyClassKey(key))
 
   /**
-   * Fetches the singleton instance for the reified type [T]. If the service was not previously
-   * registered, this returns `null` and does not invoke [onMiss].
+   * Fetches the singleton instance for the reified type [T]. If no provider has been registered,
+   * returns `null`. Does not invoke `onMiss`.
    */
   public inline fun <reified T : Any> getOrNull(): T? = getOrNull(T::class)
 
@@ -124,6 +137,8 @@ public open class SimpleServiceLocator<out S>(scope: S, allowReregister: Boolean
    * If an instance has not been previously registered, it creates and stores a new one using the
    * [provider] lambda. Creation is subject to the [allowedScopes] predicate; if the current
    * scope is not allowed, this delegates to [onInvalidScope].
+   *
+   * The multi-thread behavior depends on [threadSafetyMode].
    *
    * @param key The class of the service to retrieve.
    * @param allowedScopes A predicate to check if the current [scope] is valid for this provider.
@@ -147,8 +162,17 @@ public open class SimpleServiceLocator<out S>(scope: S, allowReregister: Boolean
    * Fetches the singleton instance for the reified type [T].
    *
    * If an instance has not been previously registered, it creates and stores a new one using the
-   * [provider] lambda. This is a convenience function equivalent to calling `getOrProvide` with
-   * `T::class`.
+   * [provider] lambda. Creation is subject to the [allowedScopes] predicate; if the current
+   * scope is not allowed, this delegates to [onInvalidScope].
+   *
+   * The multi-thread behavior depends on [threadSafetyMode].
+   *
+   * This is a convenience function equivalent to calling `getOrProvide` with `T::class`.
+   *
+   * @param T The service type to retrieve.
+   * @param allowedScopes A predicate to check if the current [scope] is valid for this provider.
+   * @param threadSafetyMode The thread safety mode for the lazy initialization.
+   * @param provider A lambda that creates the service instance if one doesn't exist.
    */
   public inline fun <reified T : Any> getOrProvide(
     noinline allowedScopes: (S) -> Boolean,
@@ -160,7 +184,7 @@ public open class SimpleServiceLocator<out S>(scope: S, allowReregister: Boolean
    * Called when [get] is called for a class [key] that has no registered provider.
    *
    * The default behavior is to throw an [IllegalArgumentException]. Subclasses can override this
-   * to provide a different fallback mechanism, such as creating a mock.
+   * to provide a different fallback mechanism.
    */
   protected open fun <T : Any> onMiss(key: KClass<T>): T =
     throw IllegalArgumentException("No value found for key: $key")
@@ -169,8 +193,8 @@ public open class SimpleServiceLocator<out S>(scope: S, allowReregister: Boolean
   /**
    * Called when [getOrProvide] is attempted for a class [key] in a disallowed scope.
    *
-   * The default behavior is to throw an [IllegalArgumentException]. Subclasses, such as a
-   * testing locator, can override this to provide a mock or other fallback instance.
+   * The default behavior is to throw an [IllegalArgumentException]. Subclasses can override this
+   * to provide a mock or other fallback instance.
    */
   protected open fun <T : Any> onInvalidScope(key: KClass<T>): T =
     throw IllegalArgumentException("Unsupported scope ${backingServiceLocator.scope} for key $key")

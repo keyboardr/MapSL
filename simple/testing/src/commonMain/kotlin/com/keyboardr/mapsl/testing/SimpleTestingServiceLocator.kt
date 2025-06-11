@@ -32,20 +32,26 @@ public abstract class SimpleTestingServiceLocator<S>(scope: S) :
   protected abstract fun <T : Any> createMock(clazz: KClass<T>): T
 
   /**
-   * Called when `get()` is called for a class that has no registered provider.
+   * Called when [get] is called for a class [T] that has no registered provider.
    *
    * This implementation overrides the default behavior to create, store, and return a mock
    * instance by calling [createMock].
+   *
+   * @param key The class [T] for which the provision was attempted.
+   * @return A [T] to be used as a fallback.
    */
   override fun <T : Any> onMiss(key: KClass<T>): T {
     return createMock(key)
   }
 
   /**
-   * Called when `getOrProvide()` is attempted for a class in a disallowed scope.
+   * Called when [getOrProvide] is attempted for a class [T] in a disallowed scope.
    *
    * This implementation overrides the default behavior to create, store, and return a mock
    * instance by calling [createMock].
+   *
+   * @param key The class [T] for which the provision was attempted.
+   * @return A [T] to be used as a fallback.
    */
   override fun <T : Any> onInvalidScope(key: KClass<T>): T {
     return createMock(key)

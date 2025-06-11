@@ -57,13 +57,20 @@ public abstract class TestingServiceLocator<S>(scope: S) :
     key: ServiceKey<T, *, GetParams, *>,
     params: GetParams,
     entry: ServiceEntry<T>,
-  ): T = if (entry is MockEntry) entry.getMock() else super.getValue(key, params, entry)
+  ): T =
+    // If entry is a MockEntry, bypass the key's lookup mechanism. The Key is expecting an entry
+    // of its own type, so we can't let the key try to downcast it.
+    if (entry is MockEntry) entry.getMock() else super.getValue(key, params, entry)
 
   /**
-   * Called when [get] is called for a key that has no registered provider.
+   * Called when [get] is called for a specified [key] that has no registered provider.
    *
    * This implementation overrides the default behavior to create, store, and return a mock
    * instance by creating a [MockEntry] using [createMockEntry].
+   *
+   * @param key The [ServiceKey] for which the provision was attempted.
+   * @param params The original parameters that would have been used for retrieval.
+   * @return A [T] to be used as a fallback.
    */
   final override fun <T : Any, GetParams> onMiss(
     key: ServiceKey<T, *, GetParams, *>,
@@ -73,10 +80,14 @@ public abstract class TestingServiceLocator<S>(scope: S) :
   }
 
   /**
-   * Called when [getOrProvide] is attempted for a key in a disallowed scope.
+   * Called when [getOrProvide] is attempted for a specified [key] in a disallowed scope.
    *
    * This implementation overrides the default behavior to create and return a [MockEntry]
    * using [createMockEntry].
+   *
+   * @param key The [ServiceKey] for which the provision was attempted.
+   * @param putParams The original parameters that would have been used for registration.
+   * @return A [ServiceEntry] to be used as a fallback.
    */
   final override fun <T : Any, PutParams> onInvalidScope(
     key: ServiceKey<T, *, *, PutParams>,

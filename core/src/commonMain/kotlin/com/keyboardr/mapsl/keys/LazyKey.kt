@@ -93,7 +93,7 @@ private fun ServiceLocator.getDefaultParams() =
  * The [provider] lambda will be invoked only the first time a value is requested for this [key].
  * The created instance will be stored and reused for all subsequent requests.
  *
- * The multi-thread behavior of the initialization is determined by [threadSafetyMode].
+ * By default, it is an error to register the same `key` more than once.
  *
  * @param key The [LazyKey] to associate with the provider.
  * @param threadSafetyMode The [LazyThreadSafetyMode] for the initialization.
@@ -108,8 +108,6 @@ public fun <T : Any> ServiceLocator.put(
 }
 
 /**
- * A [ServiceKey] that loads services lazily. The [LazyKey.PutParams.provider] will be
- * invoked the first time the ServiceLocator is queried for the key's value. The multi-thread
- * behavior depends on [LazyKey.PutParams.threadSafetyMode].
+ * Creates a [LazyKey] for the reified type `T`.
  */
 public inline fun <reified T : Any> LazyKey(): LazyKey<T> = LazyKey<T>(T::class)

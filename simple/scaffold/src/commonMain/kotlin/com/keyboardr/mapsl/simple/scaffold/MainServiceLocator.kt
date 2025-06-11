@@ -17,7 +17,9 @@ public object MainServiceLocator {
     private set
 
   /**
-   * Initializes or replaces the `MainServiceLocator` instance.
+   * Initializes the `MainServiceLocator` instance. If the If the [serviceLocator]'s scope is
+   * [ServiceLocatorScope.Production], this will throw an exception if the instance is already
+   * initialized. Otherwise it will overwrite the current instance.
    *
    * This should typically only be called once at application startup. On Android, this is handled
    * automatically by [ServiceLocatorInitializer]. If you need to perform manual registration
@@ -47,6 +49,18 @@ public object MainServiceLocator {
     }
   }
 
+  /**
+   * Initializes the `MainServiceLocator` instance. If the If the [scope] is
+   * [ServiceLocatorScope.Production], this will throw an exception if the instance is already
+   * initialized. Otherwise it will overwrite the current instance.
+   *
+   * This should typically only be called once at application startup. On Android, this is handled
+   * automatically by [ServiceLocatorInitializer]. If you need to perform manual registration
+   * (e.g., to pre-register services at startup), you must first disable the automatic
+   * initializer to avoid conflicts.
+   *
+   * @see [Disable automatic initialization](https://developer.android.com/topic/libraries/app-startup#disable-individual)
+   */
   public fun register(
     scope: ServiceLocatorScope,
     registrationBlock: SimpleServiceLocator<ServiceLocatorScope>.() -> Unit,
@@ -63,15 +77,22 @@ internal interface PreRegistered
 public enum class ServiceLocatorScope {
   /** The scope for a standard application runtime environment. */
   Production,
+
   /** The scope for a test runtime environment. */
   Testing
 }
 
 
 /**
- * Fetches a service from the locator, creating and storing it if it doesn't already exist.
- * This provider is only active in the `Production` scope.
+ * Fetches the singleton instance for the reified type [T].
  *
+ * If an instance has not been previously registered, it creates and stores a new one using the
+ * [provider] lambda. This provider is only active in the [ServiceLocatorScope.Production] scope;
+ * in other scopes, this delegates to the locator's `onInvalidScope` behavior.
+ *
+ * @param T The service type to retrieve.
+ * @param threadSafetyMode The thread safety mode for the lazy initialization.
+ * @param provider A lambda that creates the service instance if one doesn't exist.
  * @see SimpleServiceLocator.getOrProvide
  */
 public inline fun <reified T : Any> SimpleServiceLocator<ServiceLocatorScope>.getOrProvide(
