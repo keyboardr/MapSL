@@ -31,7 +31,7 @@ You'll also need a mocking library for testing.
 `MainServiceLocator` already configured. This allows you to skip some of the setup steps below.
 > See the [scaffold guide](./scaffold.md) for more details.
 
-```
+```kotlin
 // build.gradle.kts
 
 dependencies {
