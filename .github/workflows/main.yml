@@ -20,6 +20,6 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: 21'
+          java-version: 21
       - name: Unit tests
         run: ./gradlew allTests testDebugUnitTest --stacktrace
