@@ -1,5 +1,3 @@
-import dev.keyboardr.build.jdkVersion
-
 plugins {
   alias(libs.plugins.kotlin.jvm)
   alias(libs.plugins.kotlin.compose)

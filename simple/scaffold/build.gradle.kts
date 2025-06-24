@@ -1,5 +1,4 @@
 import com.android.build.api.dsl.androidLibrary
-import dev.keyboardr.build.jdkVersion
 
 plugins {
   alias(libs.plugins.kotlin.multiplatform)

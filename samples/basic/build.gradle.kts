@@ -1,6 +1,3 @@
-import dev.keyboardr.build.javaVersion
-import dev.keyboardr.build.jdkVersion
-
 plugins {
   alias(libs.plugins.android.application)
   alias(libs.plugins.kotlin.android)
