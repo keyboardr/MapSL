@@ -1,12 +1,27 @@
+import org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation
+
 plugins {
   id("mapsl.documentable")
   id("maven-publish")
+  kotlin("multiplatform")
 }
 
 group = "com.keyboardr.mapsl"
-version = "0.2.0"
+version = mapSlLibs.versions.mapsl
 
-if(properties.containsKey("repsyUrl")) {
+kotlin {
+  @OptIn(ExperimentalAbiValidation::class)
+  abiValidation {
+    enabled.set(true)
+
+    // Only check API. ABI can't be verified for iOS on Windows machines.
+    klib {
+      enabled.set(false)
+    }
+  }
+}
+
+if (properties.containsKey("repsyUrl")) {
   publishing {
     publications {
       repositories {
@@ -22,4 +37,10 @@ if(properties.containsKey("repsyUrl")) {
   }
 } else {
   logger.warn("Publishing repository not configured")
+}
+
+tasks.withType<PublishToMavenRepository> {
+  dependsOn(rootProject.subprojects.map { subproject ->
+    subproject.tasks.named { it == "checkLegacyAbi" }
+  })
 }

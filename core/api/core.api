@@ -1,0 +1,123 @@
+public abstract interface annotation class com/keyboardr/mapsl/ExperimentalKeyType : java/lang/annotation/Annotation {
+}
+
+public abstract class com/keyboardr/mapsl/ServiceLocator {
+	public fun <init> ()V
+	public fun <init> (Z)V
+	public synthetic fun <init> (ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun get (Lcom/keyboardr/mapsl/keys/ServiceKey;Ljava/lang/Object;)Ljava/lang/Object;
+	public final fun getOrNull (Lcom/keyboardr/mapsl/keys/ServiceKey;Ljava/lang/Object;)Ljava/lang/Object;
+	protected final fun getOrProvideEntry (Lcom/keyboardr/mapsl/keys/ServiceKey;Lkotlin/jvm/functions/Function0;)Lcom/keyboardr/mapsl/keys/ServiceEntry;
+	protected fun getValue (Lcom/keyboardr/mapsl/keys/ServiceKey;Ljava/lang/Object;Lcom/keyboardr/mapsl/keys/ServiceEntry;)Ljava/lang/Object;
+	protected fun onMiss (Lcom/keyboardr/mapsl/keys/ServiceKey;Ljava/lang/Object;)Ljava/lang/Object;
+	public final fun put (Lcom/keyboardr/mapsl/keys/ServiceKey;Ljava/lang/Object;)V
+}
+
+public final class com/keyboardr/mapsl/ServiceLocator$ServiceLocatorException : java/lang/Exception {
+	public fun <init> (Ljava/lang/String;Lcom/keyboardr/mapsl/keys/ServiceKey;)V
+	public final fun getKey ()Lcom/keyboardr/mapsl/keys/ServiceKey;
+}
+
+public final class com/keyboardr/mapsl/ServiceLocatorKt {
+	public static final fun get (Lcom/keyboardr/mapsl/ServiceLocator;Lcom/keyboardr/mapsl/keys/ServiceKey;)Ljava/lang/Object;
+	public static final fun getOrNull (Lcom/keyboardr/mapsl/ServiceLocator;Lcom/keyboardr/mapsl/keys/ServiceKey;)Ljava/lang/Object;
+}
+
+public abstract interface class com/keyboardr/mapsl/keys/ClassKey {
+	public abstract fun getType ()Lkotlin/reflect/KClass;
+}
+
+public class com/keyboardr/mapsl/keys/FactoryKey : com/keyboardr/mapsl/keys/ServiceKey {
+	public fun <init> (Lkotlin/reflect/KClass;)V
+	public synthetic fun createEntry (Ljava/lang/Object;)Lcom/keyboardr/mapsl/keys/ServiceEntry;
+	public fun createEntry (Lkotlin/jvm/functions/Function1;)Lcom/keyboardr/mapsl/keys/FactoryKey$Entry;
+	public fun getType ()Lkotlin/reflect/KClass;
+	public fun getValue (Ljava/lang/Object;Lcom/keyboardr/mapsl/keys/ServiceEntry;)Ljava/lang/Object;
+}
+
+public final class com/keyboardr/mapsl/keys/FactoryKey$Entry : com/keyboardr/mapsl/keys/ServiceEntry {
+	public fun <init> (Lkotlin/jvm/functions/Function1;)V
+	public final fun create (Ljava/lang/Object;)Ljava/lang/Object;
+}
+
+public final class com/keyboardr/mapsl/keys/FactoryKeyKt {
+	public static final fun FactoryKey (Lkotlin/reflect/KClass;)Lcom/keyboardr/mapsl/keys/FactoryKey;
+}
+
+public final class com/keyboardr/mapsl/keys/LazyClassKey : com/keyboardr/mapsl/keys/LazyKey, com/keyboardr/mapsl/keys/ClassKey {
+	public fun <init> (Lkotlin/reflect/KClass;)V
+	public final fun component1 ()Lkotlin/reflect/KClass;
+	public final fun copy (Lkotlin/reflect/KClass;)Lcom/keyboardr/mapsl/keys/LazyClassKey;
+	public static synthetic fun copy$default (Lcom/keyboardr/mapsl/keys/LazyClassKey;Lkotlin/reflect/KClass;ILjava/lang/Object;)Lcom/keyboardr/mapsl/keys/LazyClassKey;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getType ()Lkotlin/reflect/KClass;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public class com/keyboardr/mapsl/keys/LazyKey : com/keyboardr/mapsl/keys/ServiceKey {
+	public static final field Companion Lcom/keyboardr/mapsl/keys/LazyKey$Companion;
+	public fun <init> (Lkotlin/reflect/KClass;)V
+	public fun createEntry (Lcom/keyboardr/mapsl/keys/LazyKey$PutParams;)Lcom/keyboardr/mapsl/keys/LazyKey$Entry;
+	public synthetic fun createEntry (Ljava/lang/Object;)Lcom/keyboardr/mapsl/keys/ServiceEntry;
+	public fun getType ()Lkotlin/reflect/KClass;
+	public synthetic fun getValue (Ljava/lang/Object;Lcom/keyboardr/mapsl/keys/ServiceEntry;)Ljava/lang/Object;
+	public fun getValue (Lkotlin/Unit;Lcom/keyboardr/mapsl/keys/ServiceEntry;)Ljava/lang/Object;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/keyboardr/mapsl/keys/LazyKey$Companion {
+	public final fun getDefaultLazyKeyThreadSafetyMode (Lcom/keyboardr/mapsl/ServiceLocator;)Lkotlin/LazyThreadSafetyMode;
+	public final fun setDefaultLazyKeyThreadSafetyMode (Lcom/keyboardr/mapsl/ServiceLocator;Lkotlin/LazyThreadSafetyMode;)V
+}
+
+public final class com/keyboardr/mapsl/keys/LazyKey$Entry : com/keyboardr/mapsl/keys/ParamlessServiceEntry {
+	public fun <init> (Lcom/keyboardr/mapsl/keys/LazyKey;Lkotlin/jvm/functions/Function0;Lkotlin/LazyThreadSafetyMode;)V
+	public fun getService ()Ljava/lang/Object;
+}
+
+public final class com/keyboardr/mapsl/keys/LazyKey$PutParams {
+	public fun <init> (Lkotlin/jvm/functions/Function0;Lkotlin/LazyThreadSafetyMode;)V
+	public final fun getProvider ()Lkotlin/jvm/functions/Function0;
+	public final fun getThreadSafetyMode ()Lkotlin/LazyThreadSafetyMode;
+}
+
+public final class com/keyboardr/mapsl/keys/LazyKeyKt {
+	public static final fun put (Lcom/keyboardr/mapsl/ServiceLocator;Lcom/keyboardr/mapsl/keys/LazyKey;Lkotlin/LazyThreadSafetyMode;Lkotlin/jvm/functions/Function0;)V
+	public static synthetic fun put$default (Lcom/keyboardr/mapsl/ServiceLocator;Lcom/keyboardr/mapsl/keys/LazyKey;Lkotlin/LazyThreadSafetyMode;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
+}
+
+public abstract interface class com/keyboardr/mapsl/keys/ServiceEntry {
+}
+
+public abstract interface class com/keyboardr/mapsl/keys/ServiceKey {
+	public abstract fun createEntry (Ljava/lang/Object;)Lcom/keyboardr/mapsl/keys/ServiceEntry;
+	public abstract fun getType ()Lkotlin/reflect/KClass;
+	public abstract fun getValue (Ljava/lang/Object;Lcom/keyboardr/mapsl/keys/ServiceEntry;)Ljava/lang/Object;
+}
+
+public final class com/keyboardr/mapsl/keys/SingletonClassKey : com/keyboardr/mapsl/keys/SingletonKey, com/keyboardr/mapsl/keys/ClassKey {
+	public fun <init> (Lkotlin/reflect/KClass;)V
+	public final fun component1 ()Lkotlin/reflect/KClass;
+	public final fun copy (Lkotlin/reflect/KClass;)Lcom/keyboardr/mapsl/keys/SingletonClassKey;
+	public static synthetic fun copy$default (Lcom/keyboardr/mapsl/keys/SingletonClassKey;Lkotlin/reflect/KClass;ILjava/lang/Object;)Lcom/keyboardr/mapsl/keys/SingletonClassKey;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getType ()Lkotlin/reflect/KClass;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public class com/keyboardr/mapsl/keys/SingletonKey : com/keyboardr/mapsl/keys/ServiceKey {
+	public fun <init> (Lkotlin/reflect/KClass;)V
+	public synthetic fun createEntry (Ljava/lang/Object;)Lcom/keyboardr/mapsl/keys/ServiceEntry;
+	public fun createEntry (Ljava/lang/Object;)Lcom/keyboardr/mapsl/keys/SingletonKey$Entry;
+	public fun getType ()Lkotlin/reflect/KClass;
+	public synthetic fun getValue (Ljava/lang/Object;Lcom/keyboardr/mapsl/keys/ServiceEntry;)Ljava/lang/Object;
+	public fun getValue (Lkotlin/Unit;Lcom/keyboardr/mapsl/keys/ServiceEntry;)Ljava/lang/Object;
+}
+
+public final class com/keyboardr/mapsl/keys/SingletonKey$Entry : com/keyboardr/mapsl/keys/ParamlessServiceEntry {
+	public fun <init> (Ljava/lang/Object;)V
+	public fun getService ()Ljava/lang/Object;
+}
+

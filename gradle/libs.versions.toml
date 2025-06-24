@@ -3,8 +3,10 @@ android-compileSdk = "36"
 android-targetSdk = "35"
 android-minSdk = "24"
 
+mapsl = "0.2.0"
+
 agp = "8.9.3"
-kotlin = "2.1.21"
+kotlin = "2.2.0"
 coroutines = "1.10.2"
 androidx-core = "1.16.0"
 androidx-lifetime = "2.9.1"
@@ -22,6 +24,10 @@ androidx-lifecycle = { group = "androidx.lifecycle", name = "lifecycle-common", 
 androidx-lifecycle-runtime = { group = "androidx.lifecycle", name = "lifecycle-runtime", version.ref = "androidx-lifetime" }
 androidx-startup = { group = "androidx.startup", name = "startup-runtime", version = "1.2.0" }
 
+dokka = { group = "org.jetbrains.dokka", name = "dokka-gradle-plugin", version = "2.0.0" }
+
+kotlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+kotlinx-binaryCompatibilityValidator = { group = "org.jetbrains.kotlinx.binary-compatibility-validator", name = "org.jetbrains.kotlinx.binary-compatibility-validator.gradle.plugin", version = "0.17.0" }
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version = "0.6.2" }
 
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }

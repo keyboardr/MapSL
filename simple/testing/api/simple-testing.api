@@ -1,0 +1,7 @@
+public abstract class com/keyboardr/mapsl/testing/SimpleTestingServiceLocator : com/keyboardr/mapsl/SimpleServiceLocator {
+	public fun <init> (Ljava/lang/Object;)V
+	protected abstract fun createMock (Lkotlin/reflect/KClass;)Ljava/lang/Object;
+	protected fun onInvalidScope (Lkotlin/reflect/KClass;)Ljava/lang/Object;
+	protected fun onMiss (Lkotlin/reflect/KClass;)Ljava/lang/Object;
+}
+

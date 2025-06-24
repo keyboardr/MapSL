@@ -8,5 +8,6 @@ repositories {
 
 //noinspection UseTomlInstead
 dependencies {
-  implementation("org.jetbrains.dokka:dokka-gradle-plugin:2.0.0")
+  implementation(libs.kotlin.gradlePlugin)
+  implementation(libs.dokka)
 }

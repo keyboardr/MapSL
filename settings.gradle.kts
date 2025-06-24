@@ -1,5 +1,6 @@
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 pluginManagement {
+  includeBuild("build-conventions")
   repositories {
     google {
       content {
@@ -25,7 +26,6 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "MapSL"
-includeBuild("build-conventions")
 include(":core")
 include(":docs")
 include(":lifecycle")

@@ -1,8 +1,8 @@
 import com.keyboardr.build.jdkVersion
 
 plugins {
-  id("mapsl.publishable")
   alias(libs.plugins.kotlin.multiplatform)
+  id("mapsl.publishable")
 }
 
 kotlin {

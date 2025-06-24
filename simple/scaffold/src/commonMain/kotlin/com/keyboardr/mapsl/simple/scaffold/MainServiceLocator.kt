@@ -98,4 +98,4 @@ public enum class ServiceLocatorScope {
 public inline fun <reified T : Any> SimpleServiceLocator<ServiceLocatorScope>.getOrProvide(
   threadSafetyMode: LazyThreadSafetyMode = defaultThreadSafetyMode,
   noinline provider: (ServiceLocatorScope) -> T,
-) = getOrProvide({ it == ServiceLocatorScope.Production }, threadSafetyMode, provider)
+): T = getOrProvide({ it == ServiceLocatorScope.Production }, threadSafetyMode, provider)

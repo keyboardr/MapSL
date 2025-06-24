@@ -1,0 +1,13 @@
+public abstract class com/keyboardr/mapsl/testing/TestingServiceLocator : com/keyboardr/mapsl/ScopedServiceLocator {
+	public fun <init> (Ljava/lang/Object;)V
+	public abstract fun createMock (Lkotlin/reflect/KClass;)Ljava/lang/Object;
+	protected fun createMockEntry (Lcom/keyboardr/mapsl/keys/ServiceKey;)Lcom/keyboardr/mapsl/testing/TestingServiceLocator$MockEntry;
+	protected fun getValue (Lcom/keyboardr/mapsl/keys/ServiceKey;Ljava/lang/Object;Lcom/keyboardr/mapsl/keys/ServiceEntry;)Ljava/lang/Object;
+	public final fun onInvalidScope (Lcom/keyboardr/mapsl/keys/ServiceKey;Ljava/lang/Object;)Lcom/keyboardr/mapsl/keys/ServiceEntry;
+	protected final fun onMiss (Lcom/keyboardr/mapsl/keys/ServiceKey;Ljava/lang/Object;)Ljava/lang/Object;
+}
+
+protected abstract interface class com/keyboardr/mapsl/testing/TestingServiceLocator$MockEntry : com/keyboardr/mapsl/keys/ServiceEntry {
+	public abstract fun getMock ()Ljava/lang/Object;
+}
+

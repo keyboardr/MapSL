@@ -68,7 +68,7 @@ public open class LazyKey<T : Any>(override val type: KClass<T>) :
      *
      * @see LazyThreadSafetyMode
      */
-    public var ServiceLocator.defaultLazyKeyThreadSafetyMode
+    public var ServiceLocator.defaultLazyKeyThreadSafetyMode: LazyThreadSafetyMode
       get() = getDefaultParams().threadSafetyMode
       set(value) {
         getDefaultParams().threadSafetyMode = value

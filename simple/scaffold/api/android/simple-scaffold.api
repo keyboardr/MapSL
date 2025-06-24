@@ -1,0 +1,34 @@
+public final class com/keyboardr/mapsl/simple/scaffold/MainServiceLocator {
+	public static final field INSTANCE Lcom/keyboardr/mapsl/simple/scaffold/MainServiceLocator;
+	public final fun getInstance ()Lcom/keyboardr/mapsl/SimpleServiceLocator;
+	public final fun register (Lcom/keyboardr/mapsl/SimpleServiceLocator;Lkotlin/jvm/functions/Function1;)V
+	public final fun register (Lcom/keyboardr/mapsl/simple/scaffold/ServiceLocatorScope;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun register$default (Lcom/keyboardr/mapsl/simple/scaffold/MainServiceLocator;Lcom/keyboardr/mapsl/SimpleServiceLocator;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+}
+
+public abstract interface class com/keyboardr/mapsl/simple/scaffold/MockFactory {
+	public abstract fun createMock (Lkotlin/reflect/KClass;)Ljava/lang/Object;
+}
+
+public final class com/keyboardr/mapsl/simple/scaffold/ServiceLocatorInitializer : androidx/startup/Initializer {
+	public fun <init> ()V
+	public fun create (Landroid/content/Context;)Lcom/keyboardr/mapsl/SimpleServiceLocator;
+	public synthetic fun create (Landroid/content/Context;)Ljava/lang/Object;
+	public fun dependencies ()Ljava/util/List;
+}
+
+public final class com/keyboardr/mapsl/simple/scaffold/ServiceLocatorScope : java/lang/Enum {
+	public static final field Production Lcom/keyboardr/mapsl/simple/scaffold/ServiceLocatorScope;
+	public static final field Testing Lcom/keyboardr/mapsl/simple/scaffold/ServiceLocatorScope;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/keyboardr/mapsl/simple/scaffold/ServiceLocatorScope;
+	public static fun values ()[Lcom/keyboardr/mapsl/simple/scaffold/ServiceLocatorScope;
+}
+
+public final class com/keyboardr/mapsl/simple/scaffold/TestServiceLocator {
+	public static final field INSTANCE Lcom/keyboardr/mapsl/simple/scaffold/TestServiceLocator;
+	public final fun getInstance ()Lcom/keyboardr/mapsl/SimpleServiceLocator;
+	public final fun register (Lcom/keyboardr/mapsl/simple/scaffold/MockFactory;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun register$default (Lcom/keyboardr/mapsl/simple/scaffold/TestServiceLocator;Lcom/keyboardr/mapsl/simple/scaffold/MockFactory;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+}
+
