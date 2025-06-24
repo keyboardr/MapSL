@@ -1,5 +1,8 @@
 # MapSL
 
+<a href="https://github.com/keyboardr/mapsl/actions?query=branch%3Amain"><img alt="Build Status" src="https://github.com/keyboardr/mapsl/actions/workflows/main.yml/badge.svg"/></a>
+<a href="https://repo1.maven.org/maven2/dev/keyboardr/mapsl/"><img alt="Maven Central" src="https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Frepo1.maven.org%2Fmaven2%2Fdev%2Fkeyboardr%2Fmapsl%2Fmaven-metadata.xml"/></a>
+
 MapSL is a straightforward Service Locator library for Kotlin Multiplatform, designed to make dependency management simple and transparent.
 
 The goal of MapSL is to provide an easy-to-learn alternative to more complex dependency injection frameworks. It achieves this by using a heterogeneous map at its core, without relying on annotation processing or code generation.
