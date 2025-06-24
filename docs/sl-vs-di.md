@@ -80,7 +80,7 @@ allowing the top-level `ServiceLocator` to be swapped out for a test instance th
 configured with your project's common fakes, and provides mocks when no fake has been registered.
 Additionally, smaller scoped `ServiceLocators` may be passed in to classes as needed, resulting in a
 hybrid approach (hierarchical `ServiceLocators` are possible, which would help here. These would
-behave similarly to Context objects. See [Future Plans](../README.md#future-plans))).
+behave similarly to Context objects. See [Future Plans](../README.md#future-plans)).
 
 ### Runtime safety
 
