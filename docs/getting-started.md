@@ -18,10 +18,13 @@ The key benefits of using MapSL's `simple` module include:
 - **No Code Generation:** Avoids build-time overhead and complexity associated with annotation
   processors.
 - **Testability:** Provides built-in support for swapping out dependencies in tests.
-- **Easy migration:** Built on top of the `core` and `scoped` modules, so migration is easy if more power or flexibility is
+- **Easy migration:** Built on top of the `core` and `scoped` modules, so migration is easy if more
+  power or flexibility is
   needed (see [Migration](migration.md)).
 
 ## 1. Add Dependencies
+
+<a href="https://repo1.maven.org/maven2/dev/keyboardr/mapsl/"><img alt="Maven Central" src="https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Frepo1.maven.org%2Fmaven2%2Fdev%2Fkeyboardr%2Fmapsl%2Fcore%2Fmaven-metadata.xml"/></a>
 
 To use the `simple` flavor, add the `simple` module dependency to your main source set and the
 `simple-testing` dependency to your test source set in your project's `build.gradle.kts` file.

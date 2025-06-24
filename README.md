@@ -22,9 +22,9 @@ The goal of MapSL is to provide an easy-to-learn alternative to more complex dep
 
 ## Declaring Dependencies
 
-MapSL is not yet available on Maven Central, but will be once its initial API is stable.
+MapSL is available via Maven Central under the group id `dev.keyboardr.mapsl`.
 
-## Module Structure
+### Module Structure
 
 MapSL consists of the following library modules:
 
