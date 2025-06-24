@@ -7,8 +7,8 @@ plugins {
 }
 
 group = "dev.keyboardr.mapsl"
-version = mapSlLibs.versions.mapsl + if(properties.containsKey("IS_CI")) "" else "-SNAPSHOT"
-
+version = mapSlLibs.versions.mapsl +
+    if (System.getenv("IS_CI").toBoolean()) "" else "-SNAPSHOT"
 kotlin {
   @OptIn(ExperimentalAbiValidation::class)
   abiValidation {
