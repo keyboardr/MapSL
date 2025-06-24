@@ -2,12 +2,12 @@ import org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation
 
 plugins {
   id("mapsl.documentable")
-  id("maven-publish")
+  id("com.vanniktech.maven.publish")
   kotlin("multiplatform")
 }
 
 group = "dev.keyboardr.mapsl"
-version = mapSlLibs.versions.mapsl
+version = mapSlLibs.versions.mapsl + if(properties.containsKey("IS_CI")) "" else "-SNAPSHOT"
 
 kotlin {
   @OptIn(ExperimentalAbiValidation::class)
@@ -21,22 +21,34 @@ kotlin {
   }
 }
 
-if (properties.containsKey("repsyUrl")) {
-  publishing {
-    publications {
-      repositories {
-        maven {
-          url = uri(property("repsyUrl") as String)
-          credentials {
-            username = property("repsyUsername") as String
-            password = property("repsyPassword") as String
-          }
-        }
+mavenPublishing {
+  publishToMavenCentral()
+  signAllPublications()
+
+  pom {
+    name.set("MapSL")
+    description.set("Service Locator library")
+    inceptionYear.set("2025")
+    url.set("https://github.com/keyboardr/mapsl/")
+    licenses {
+      license {
+        name.set("The MIT License")
+        url.set("http://www.opensource.org/licenses/mit-license.php")
       }
     }
+    developers {
+      developer {
+        id.set("keyboardr")
+        name.set("Josh Brown")
+        url.set("https://github.com/keyboardr/")
+      }
+    }
+    scm {
+      url.set("https://github.com/keyboardr/mapsl/")
+      connection.set("scm:git:git://github.com/keyboardr/mapsl.git")
+      developerConnection.set("scm:git:ssh://git@github.com/keyboardr/mapsl.git")
+    }
   }
-} else {
-  logger.warn("Publishing repository not configured")
 }
 
 tasks.withType<PublishToMavenRepository> {

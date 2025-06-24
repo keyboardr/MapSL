@@ -38,6 +38,8 @@ androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-toolin
 
 stately-collections = { group = "co.touchlab", name = "stately-concurrent-collections", version = "2.0.0" }
 
+vanniktech-mavenPublish = { group = "com.vanniktech.maven.publish", name = "com.vanniktech.maven.publish.gradle.plugin", version = "0.33.0"}
+
 # Testing
 androidx-test = { group = "androidx.test", name = "core-ktx", version.ref = "androidx-test" }
 androidx-test-junit = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "androidx-test-junit" }
