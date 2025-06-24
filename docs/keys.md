@@ -262,11 +262,11 @@ instance will be created.
 - **Key Equivalence:** Based on the specific `LifecycleKey` instance.
 - **Experimental:** This key type is marked with `@ExperimentalKeyType`. Its API is subject to
   change.
-- Requires The `com.keyboardr.mapsl:lifecycle` module dependency.
+- Requires The `dev.keyboardr.mapsl:lifecycle` module dependency.
 
 ```kotlin
-// Requires adding the 'com.keyboardr.mapsl:lifecycle' dependency.
-import com.keyboardr.mapsl.lifecycle.put // Import the put extension for LifecycleKey
+// Requires adding the 'dev.keyboardr.mapsl:lifecycle' dependency.
+import dev.keyboardr.mapsl.lifecycle.put // Import the put extension for LifecycleKey
 
 // 1. Declare a LifecycleKey instance
 val lifecycleServiceKey = LifecycleKey<LifecycleAwareService>()

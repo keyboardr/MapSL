@@ -29,12 +29,12 @@ kotlin {
   sourceSets {
     commonMain.dependencies {
       // Add the MapSL module you are using (e.g., simple)
-      implementation("com.keyboardr.mapsl:simple:<latest_version>")
+      implementation("dev.keyboardr.mapsl:simple:<latest_version>")
       // ... other common dependencies
     }
 
     commonTest.dependencies {
-      implementation("com.keyboardr.mapsl:simple-testing:<latest_version>")
+      implementation("dev.keyboardr.mapsl:simple-testing:<latest_version>")
     }
   }
 }

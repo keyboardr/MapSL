@@ -36,10 +36,10 @@ You'll also need a mocking library for testing.
 
 dependencies {
   // Add the simple module for core MapSL functionality in your main code
-  implementation("com.keyboardr.mapsl:simple:<latest_version>")
+  implementation("dev.keyboardr.mapsl:simple:<latest_version>")
 
   // Add the simple-testing module for test utilities 
-  testImplementation("com.keyboardr.mapsl:simple-testing:<latest_version>")
+  testImplementation("dev.keyboardr.mapsl:simple-testing:<latest_version>")
 
   // You'll need a mocking library for testing your code, e.g., Mockito-Kotlin
   testImplementation("org.mockito.kotlin:mockito-kotlin:<latest_version>")

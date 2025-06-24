@@ -107,15 +107,15 @@ If you haven't already, add the `core` and `scoped` module dependencies to your 
 ```kotlin
 dependencies {
   // Keep simple for now
-  implementation("com.keyboardr.mapsl:simple:<version>")
-  testImplementation("com.keyboardr.mapsl:simple-testing:<version>")
+  implementation("dev.keyboardr.mapsl:simple:<version>")
+  testImplementation("dev.keyboardr.mapsl:simple-testing:<version>")
 
   // Add core and scoped
-  implementation("com.keyboardr.mapsl:core:<version>")
-  implementation("com.keyboardr.mapsl:scoped:<version>")
-  testImplementation("com.keyboardr.mapsl:scoped-testing:<version>")
+  implementation("dev.keyboardr.mapsl:core:<version>")
+  implementation("dev.keyboardr.mapsl:scoped:<version>")
+  testImplementation("dev.keyboardr.mapsl:scoped-testing:<version>")
   // Add other modules for the Full flavor if needed (e.g., lifecycle)
-  // implementation("com.keyboardr.mapsl:lifecycle:<version>")
+  // implementation("dev.keyboardr.mapsl:lifecycle:<version>")
 }
 ```
 
@@ -170,11 +170,11 @@ The primary change is that you are now calling the `put` extension function defi
 `ScopedServiceLocator` instead of the one defined for `SimpleServiceLocator`.
 
 To ensure you are using the correct extension function, you may need to add an import for the `put`
-extension function from the `com.keyboardr.mapsl.keys` package.
+extension function from the `dev.keyboardr.mapsl.keys` package.
 
 ```kotlin
 // Add this import at the top of your registration file if needed
-// import com.keyboardr.mapsl.keys.put
+// import dev.keyboardr.mapsl.keys.put
 
 // Inside your registration lambda (syntax is the same as before)
 MainServiceLocator.register(ScopedServiceLocator(ProductionScope), /* ... */) { // Updated locator type
@@ -207,7 +207,7 @@ Update test registrations to use the implicit `ClassKey` extensions on the `Test
 
 ```kotlin
 // Add this import at the top of the file if needed
-// import com.keyboardr.mapsl.keys.put
+// import dev.keyboardr.mapsl.keys.put
 
 // Before (test setup - implicit ClassKey)
 TestServiceLocator.register(/* ... */) {
@@ -228,8 +228,8 @@ for the `get` or `getOrProvide` extension functions.
 
 ```kotlin
 // Add this import at the top of your registration file if needed
-//import com.keyboardr.mapsl.get
-//import com.keyboardr.mapsl.getOrProvide
+//import dev.keyboardr.mapsl.get
+//import dev.keyboardr.mapsl.getOrProvide
 
 class MyService {
   companion object {

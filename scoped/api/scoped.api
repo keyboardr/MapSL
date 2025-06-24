@@ -1,14 +1,14 @@
-public class com/keyboardr/mapsl/ScopedServiceLocator : com/keyboardr/mapsl/ServiceLocator {
+public class dev/keyboardr/mapsl/ScopedServiceLocator : dev/keyboardr/mapsl/ServiceLocator {
 	public fun <init> (Ljava/lang/Object;Z)V
 	public synthetic fun <init> (Ljava/lang/Object;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun getOrProvide (Lcom/keyboardr/mapsl/keys/ServiceKey;Lkotlin/jvm/functions/Function1;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+	public final fun getOrProvide (Ldev/keyboardr/mapsl/keys/ServiceKey;Lkotlin/jvm/functions/Function1;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
 	public final fun getScope ()Ljava/lang/Object;
-	public fun onInvalidScope (Lcom/keyboardr/mapsl/keys/ServiceKey;Ljava/lang/Object;)Lcom/keyboardr/mapsl/keys/ServiceEntry;
+	public fun onInvalidScope (Ldev/keyboardr/mapsl/keys/ServiceKey;Ljava/lang/Object;)Ldev/keyboardr/mapsl/keys/ServiceEntry;
 }
 
-public final class com/keyboardr/mapsl/ScopedServiceLocatorKt {
-	public static final fun getOrProvide (Lcom/keyboardr/mapsl/ScopedServiceLocator;Lcom/keyboardr/mapsl/keys/LazyKey;Lkotlin/jvm/functions/Function1;Lkotlin/LazyThreadSafetyMode;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
-	public static final fun getOrProvide (Lcom/keyboardr/mapsl/ScopedServiceLocator;Lcom/keyboardr/mapsl/keys/ServiceKey;Lkotlin/jvm/functions/Function1;Ljava/lang/Object;)Ljava/lang/Object;
-	public static synthetic fun getOrProvide$default (Lcom/keyboardr/mapsl/ScopedServiceLocator;Lcom/keyboardr/mapsl/keys/LazyKey;Lkotlin/jvm/functions/Function1;Lkotlin/LazyThreadSafetyMode;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)Ljava/lang/Object;
+public final class dev/keyboardr/mapsl/ScopedServiceLocatorKt {
+	public static final fun getOrProvide (Ldev/keyboardr/mapsl/ScopedServiceLocator;Ldev/keyboardr/mapsl/keys/LazyKey;Lkotlin/jvm/functions/Function1;Lkotlin/LazyThreadSafetyMode;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public static final fun getOrProvide (Ldev/keyboardr/mapsl/ScopedServiceLocator;Ldev/keyboardr/mapsl/keys/ServiceKey;Lkotlin/jvm/functions/Function1;Ljava/lang/Object;)Ljava/lang/Object;
+	public static synthetic fun getOrProvide$default (Ldev/keyboardr/mapsl/ScopedServiceLocator;Ldev/keyboardr/mapsl/keys/LazyKey;Lkotlin/jvm/functions/Function1;Lkotlin/LazyThreadSafetyMode;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)Ljava/lang/Object;
 }
 

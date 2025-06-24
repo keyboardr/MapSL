@@ -1,5 +1,5 @@
 import com.android.build.api.dsl.androidLibrary
-import com.keyboardr.build.jdkVersion
+import dev.keyboardr.build.jdkVersion
 
 plugins {
   alias(libs.plugins.kotlin.multiplatform)
@@ -11,7 +11,7 @@ kotlin {
   jvm()
   @Suppress("UnstableApiUsage")
   androidLibrary {
-    namespace = "com.keyboardr.mapsl.simple.scaffold"
+    namespace = "dev.keyboardr.mapsl.simple.scaffold"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
     minSdk = libs.versions.android.minSdk.get().toInt()
 

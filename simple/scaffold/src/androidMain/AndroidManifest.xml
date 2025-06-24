@@ -8,7 +8,7 @@
             android:exported="false"
             tools:node="merge">
             <meta-data
-                android:name="com.keyboardr.mapsl.simple.scaffold.ServiceLocatorInitializer"
+                android:name="dev.keyboardr.mapsl.simple.scaffold.ServiceLocatorInitializer"
                 android:value="androidx.startup" />
         </provider>
     </application>

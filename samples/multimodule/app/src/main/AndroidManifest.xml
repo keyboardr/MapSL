@@ -9,7 +9,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Sample">
         <activity
-            android:name="com.keyboardr.mapsl.sample.multimodule.MainActivity"
+            android:name="dev.keyboardr.mapsl.sample.multimodule.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.Sample">
             <intent-filter>

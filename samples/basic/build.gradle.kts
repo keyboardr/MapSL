@@ -1,5 +1,5 @@
-import com.keyboardr.build.javaVersion
-import com.keyboardr.build.jdkVersion
+import dev.keyboardr.build.javaVersion
+import dev.keyboardr.build.jdkVersion
 
 plugins {
   alias(libs.plugins.android.application)
@@ -8,11 +8,11 @@ plugins {
 }
 
 android {
-  namespace = "com.keyboardr.mapsl.sample.basic"
+  namespace = "dev.keyboardr.mapsl.sample.basic"
   compileSdk = libs.versions.android.compileSdk.get().toInt()
 
   defaultConfig {
-    applicationId = "com.keyboardr.mapsl.sample.basic"
+    applicationId = "dev.keyboardr.mapsl.sample.basic"
     minSdk = libs.versions.android.minSdk.get().toInt()
     targetSdk = libs.versions.android.targetSdk.get().toInt()
     versionCode = 1

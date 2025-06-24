@@ -25,7 +25,7 @@ First, add the necessary dependencies to your `build.gradle.kts`:
 ```kotlin
 dependencies {
   // ... other dependencies
-  testImplementation("com.keyboardr.mapsl:simple-testing:<latest_version>")
+  testImplementation("dev.keyboardr.mapsl:simple-testing:<latest_version>")
   testImplementation("org.mockito.kotlin:mockito-kotlin:<latest_version>") // Or io.mockk:mockk for MockK
 }
 ```

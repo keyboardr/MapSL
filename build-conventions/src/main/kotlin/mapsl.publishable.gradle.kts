@@ -6,7 +6,7 @@ plugins {
   kotlin("multiplatform")
 }
 
-group = "com.keyboardr.mapsl"
+group = "dev.keyboardr.mapsl"
 version = mapSlLibs.versions.mapsl
 
 kotlin {

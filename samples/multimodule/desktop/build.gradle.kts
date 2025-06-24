@@ -1,4 +1,4 @@
-import com.keyboardr.build.jdkVersion
+import dev.keyboardr.build.jdkVersion
 
 plugins {
   alias(libs.plugins.kotlin.jvm)
@@ -26,12 +26,12 @@ compose {
         appResourcesRootDir.set(project.layout.projectDirectory.dir("assets"))
         packageName = "multimodule"
       }
-      mainClass = "com.keyboardr.mapsl.sample.multimodule.MainApplication"
+      mainClass = "dev.keyboardr.mapsl.sample.multimodule.MainApplication"
     }
   }
 
   resources {
-    packageOfResClass = "com.keyboardr.mapsl.sample.multimodule"
+    packageOfResClass = "dev.keyboardr.mapsl.sample.multimodule"
     generateResClass = always
   }
 }

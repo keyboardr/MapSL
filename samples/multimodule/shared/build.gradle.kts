@@ -1,5 +1,5 @@
 import com.android.build.api.dsl.androidLibrary
-import com.keyboardr.build.jdkVersion
+import dev.keyboardr.build.jdkVersion
 
 plugins {
   alias(libs.plugins.kotlin.multiplatform)
@@ -8,7 +8,7 @@ plugins {
   alias(libs.plugins.jetbrains.compose)
 }
 
-val applicationId = "com.keyboardr.mapsl.sample.multimodule.shared"
+val applicationId = "dev.keyboardr.mapsl.sample.multimodule.shared"
 
 kotlin {
   jvm("desktop")

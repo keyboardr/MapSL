@@ -1,12 +1,12 @@
 import com.android.build.api.dsl.androidLibrary
-import com.keyboardr.build.jdkVersion
+import dev.keyboardr.build.jdkVersion
 
 plugins {
   alias(libs.plugins.kotlin.multiplatform)
   alias(libs.plugins.kotlin.multiplatform.library)
 }
 
-val applicationId = "com.keyboardr.mapsl.sample.multimodule.testing"
+val applicationId = "dev.keyboardr.mapsl.sample.multimodule.testing"
 
 kotlin {
   jvm("desktop")

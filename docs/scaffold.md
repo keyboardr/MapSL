@@ -45,7 +45,7 @@ pre-register services, add the following to the `application` section of your `A
 
 <provider android:authorities="${applicationId}.androidx-startup" android:exported="false"
     android:name="androidx.startup.InitializationProvider" tools:node="merge">
-    <meta-data android:name="com.keyboardr.mapsl.simple.scaffold.ServiceLocatorInitializer"
+    <meta-data android:name="dev.keyboardr.mapsl.simple.scaffold.ServiceLocatorInitializer"
         tools:node="remove" />
 </provider>
 ```
