@@ -13,4 +13,5 @@ dependencies {
   dokka(projects.scoped.scopedTesting)
   dokka(projects.simple)
   dokka(projects.simple.simpleTesting)
+  dokka(projects.simple.simpleScaffold)
 }
