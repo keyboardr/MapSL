@@ -24,6 +24,9 @@ The goal of MapSL is to provide an easy-to-learn alternative to more complex dep
 
 MapSL is available via Maven Central under the group id `dev.keyboardr.mapsl`.
 
+Example:
+`"dev.keyboardr.mapsl:simple:<version>"`
+
 ### Module Structure
 
 MapSL consists of the following library modules:
