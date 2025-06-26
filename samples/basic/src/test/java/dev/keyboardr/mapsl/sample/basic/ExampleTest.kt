@@ -28,7 +28,7 @@ class ExampleTest {
   @Test
   fun registered_returnsSameInstance() {
     val instance = MyService()
-    TestServiceLocator.put<MyService> { instance }
+    MainServiceLocator.instance.put<MyService> { instance }
 
     val myService = MyService.instance
 
