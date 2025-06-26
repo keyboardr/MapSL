@@ -9,16 +9,18 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import kotlin.reflect.KClass
 
-object TestServiceLocator :
+class TestServiceLocator :
   SimpleTestingServiceLocator<ServiceLocatorScope.Testing>(ServiceLocatorScope.Testing) {
   override fun <T : Any> createMock(clazz: KClass<T>): T = mockForClass<T>(clazz)
 
-  fun register(context: PlatformContext) {
-    MainServiceLocator.register(this, context) {
-      // Register common fakes here
-      put<BazManager> {
-        mock<BazManager> {
-          on { sayHello() } doReturn "stubbed hello"
+  companion object {
+    fun register(context: PlatformContext) {
+      MainServiceLocator.register(TestServiceLocator(), context) {
+        // Register common fakes here
+        put<BazManager> {
+          mock<BazManager> {
+            on { sayHello() } doReturn "stubbed hello"
+          }
         }
       }
     }
