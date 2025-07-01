@@ -5,14 +5,23 @@ import dev.keyboardr.mapsl.get
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFails
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.seconds
 
 class LazyKeyTest {
 
@@ -112,6 +121,95 @@ class LazyKeyTest {
     coroutineScope.launch(newSingleThreadContext("third")) { serviceLocator.get(key) }
   }
 
+  @OptIn(ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)
+  @Test
+  fun multipleGet_whileLoading_returnsSameValue() = runTest {
+    val key = LazyKey<Any>()
+    val isLoading = MutableStateFlow(true)
+    val serviceLocator = TestServiceLocator()
+
+    serviceLocator.put(key) {
+      runBlocking {
+        println("loading start")
+        isLoading.first { !it }
+        Any()
+        println("loading complete")
+      }
+    }
+
+    val firstResult = async(newSingleThreadContext("first")) {
+      println("start first")
+      serviceLocator.get(key).also {
+        println("end first")
+      }
+    }
+    val secondResult = async(newSingleThreadContext("second")) {
+      println("start second")
+      serviceLocator.get(key).also {
+        println("end second")
+      }
+    }
+    launch {
+      delay(1.seconds)
+      println("stop loading")
+      isLoading.emit(false)
+      println("loading stopped")
+    }
+
+    assertSame(firstResult.await(), secondResult.await())
+  }
+
+  @Test
+  fun referenceChain_initializesAllServices() {
+    val firstKey = LazyKey<Any>()
+    val firstItem = Any()
+    val secondKey = LazyKey<Any>()
+    val secondItem = Any()
+    var secondItemInitialized = false
+    val serviceLocator = TestServiceLocator().apply {
+      put(firstKey) {
+        get(secondKey)
+        firstItem
+      }
+
+      put(secondKey) {
+        secondItemInitialized = true
+        secondItem
+      }
+    }
+
+    val result = serviceLocator.get(firstKey)
+
+    assertSame(result, firstItem)
+    assertTrue(secondItemInitialized)
+  }
+
+  @Test
+  fun circularReference_throwsException() {
+    val firstKey = LazyKey<Any>()
+    val firstItem = Any()
+    val secondKey = LazyKey<Any>()
+    val secondItem = Any()
+
+    var firstKeyGetCalls = 0
+    val serviceLocator = TestServiceLocator().apply {
+      put(firstKey) {
+        firstKeyGetCalls++
+        get(secondKey)
+        firstItem
+      }
+
+      put(secondKey) {
+        get(firstKey)
+        secondItem
+      }
+    }
+
+    assertFailsWith<IllegalStateException> {
+      serviceLocator.get(firstKey)
+    }
+    assertEquals(1, firstKeyGetCalls)
+  }
 
   private class TestServiceLocator : ServiceLocator() {
     var missed = false
