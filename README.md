@@ -19,6 +19,35 @@ The goal of MapSL is to provide an easy-to-learn alternative to more complex dep
 
 - **No Code Generation**: Avoids the build-time overhead and complexity of annotation processors.
 
+### **Architectural Benefits**
+
+```mermaid
+flowchart TD
+    subgraph "Typical Static Locator / DI"
+    BadLocator[Static Locator] --> FeatureA[Feature1]
+    BadLocator --> FeatureB[Feature2]
+    FeatureA -.->|Circular Dep Risk| BadLocator
+    end
+
+    subgraph "MapSL Architecture"
+    App --> Feature1
+    App --> Feature2
+    Feature1 --> Common
+    Feature2 --> Common
+    Common[Common Module<br/>holds ServiceLocator] --> MapSL[MapSL Lib]
+    end
+    
+    style BadLocator fill:red,stroke:#333,stroke-width:2px
+    style Common fill:green,stroke:#333,stroke-width:2px
+```
+
+-   **Modular Build Friendly**: MapSL acts as a generic container, not a typed registry. This allows your central `ServiceLocator` to exist in a low-level module without depending on your Feature modules, preventing circular dependencies and maximizing compilation parallelism.
+    
+-   **True Lazy Loading**: Because the Locator holds no compile-time references to services, accessing one dependency doesn't force the classloader to load or verify unrelated parts of the app, improving startup performance.
+    
+-   **Colocated & Explicit Access**: Retrieval logic (e.g., `MyService.getInstance()`) is in the same file as the service definition. This makes obtaining an instance obvious to the caller and keeps refactoring contained within the service's file, rather than scattered across registry files.
+    
+-   **Test-Centric**: Includes zero-config mocking for unregistered keys and support for global fakes, drastically reducing test boilerplate.
 
 ## Declaring Dependencies
 
