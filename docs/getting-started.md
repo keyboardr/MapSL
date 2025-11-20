@@ -183,6 +183,13 @@ fun doSomething() {
 }
 ```
 
+> Services written in Java can expose a static accessor function as follows:
+> ```java
+> public static MyService getInstance() {
+>   return MainServiceLocator.getInstance().getOrProvide(MyService.class, () -> new MyService());
+> }
+> ```
+
 ### Pre-Registration
 
 While late registration is recommended, you can still pre-register services directly in the
