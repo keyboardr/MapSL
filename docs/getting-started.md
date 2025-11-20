@@ -273,6 +273,15 @@ Here is a brief overview:
   specify the type (e.g., `get<MyService>()`) even if it seems it can be inferred, to avoid
   ambiguity.
 
+- **Access Encapsulation**: Most classes should not need to reference your `ServiceLocator` directly.
+  Each service should define its own `instance` `val` or `getInstance()` function, and the direct
+  call to the `ServiceLocator` should happen there. Any `put` calls should happen in centralized
+  registration blocks during app startup or test initialization.
+
+- **Atomic Service Registration**: For pre-registered services, add the `put` call in the same commit
+  that adds the corresponding `get` in the service class. This prevents attempting to fetch a service
+  that hasn't been registered, which would result in a crash.
+
 - **Type Erasure**: Avoid using generic types like `List<String>` as keys, as type erasure means
   `get<List<Int>>()` could resolve to a `List<String>`. Instead, wrap them in a non-generic class (
   e.g., `StringListHolder(val list: List<String>)`).
