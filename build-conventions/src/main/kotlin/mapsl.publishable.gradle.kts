@@ -55,4 +55,7 @@ tasks.withType<PublishToMavenRepository> {
   dependsOn(rootProject.subprojects.map { subproject ->
     subproject.tasks.named { it == "checkLegacyAbi" }
   })
+  doLast {
+    println("Don't forget to click publish at https://central.sonatype.com/publishing/deployments")
+  }
 }
