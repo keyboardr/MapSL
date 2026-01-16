@@ -9,6 +9,7 @@ import dev.keyboardr.mapsl.keys.LazyKey
 import dev.keyboardr.mapsl.keys.ServiceEntry
 import dev.keyboardr.mapsl.keys.ServiceKey
 import dev.keyboardr.mapsl.keys.SingletonKey
+import kotlin.jvm.JvmOverloads
 
 
 /**
@@ -36,7 +37,9 @@ public typealias Key<T> = ServiceKey<T, *, *, *>
  * @param allowReregister if true, allow registering keys multiple times. The latest registration
  * will be used. This should generally only be true for tests.
  */
-public abstract class ServiceLocator(private val allowReregister: Boolean = false) {
+public abstract class ServiceLocator @JvmOverloads constructor(
+  private val allowReregister: Boolean = false
+) {
 
   public class ServiceLocatorException(message: String, public val key: Key<*>) : Exception(message)
 
