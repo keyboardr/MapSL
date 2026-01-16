@@ -15,6 +15,7 @@ public final class dev/keyboardr/mapsl/lifecycle/LifecycleKey$Entry : dev/keyboa
 public final class dev/keyboardr/mapsl/lifecycle/LifecycleKey$PutParams {
 	public fun <init> (Landroidx/lifecycle/Lifecycle$State;Lkotlin/LazyThreadSafetyMode;Lkotlin/jvm/functions/Function0;)V
 	public synthetic fun <init> (Landroidx/lifecycle/Lifecycle$State;Lkotlin/LazyThreadSafetyMode;Lkotlin/jvm/functions/Function0;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lkotlin/LazyThreadSafetyMode;Lkotlin/jvm/functions/Function0;)V
 	public final fun component1 ()Landroidx/lifecycle/Lifecycle$State;
 	public final fun component2 ()Lkotlin/LazyThreadSafetyMode;
 	public final fun component3 ()Lkotlin/jvm/functions/Function0;
@@ -30,6 +31,8 @@ public final class dev/keyboardr/mapsl/lifecycle/LifecycleKey$PutParams {
 
 public final class dev/keyboardr/mapsl/lifecycle/LifecycleKeyKt {
 	public static final fun put (Ldev/keyboardr/mapsl/ServiceLocator;Ldev/keyboardr/mapsl/lifecycle/LifecycleKey;Landroidx/lifecycle/Lifecycle$State;Lkotlin/LazyThreadSafetyMode;Lkotlin/jvm/functions/Function0;)V
+	public static final fun put (Ldev/keyboardr/mapsl/ServiceLocator;Ldev/keyboardr/mapsl/lifecycle/LifecycleKey;Landroidx/lifecycle/Lifecycle$State;Lkotlin/jvm/functions/Function0;)V
+	public static final fun put (Ldev/keyboardr/mapsl/ServiceLocator;Ldev/keyboardr/mapsl/lifecycle/LifecycleKey;Lkotlin/jvm/functions/Function0;)V
 	public static synthetic fun put$default (Ldev/keyboardr/mapsl/ServiceLocator;Ldev/keyboardr/mapsl/lifecycle/LifecycleKey;Landroidx/lifecycle/Lifecycle$State;Lkotlin/LazyThreadSafetyMode;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
 }
 
