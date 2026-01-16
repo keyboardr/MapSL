@@ -4,6 +4,7 @@ import dev.keyboardr.mapsl.keys.LazyKey
 import dev.keyboardr.mapsl.keys.LazyKey.Companion.defaultLazyKeyThreadSafetyMode
 import dev.keyboardr.mapsl.keys.ServiceEntry
 import dev.keyboardr.mapsl.keys.ServiceKey
+import kotlin.jvm.JvmOverloads
 
 /**
  * A [ServiceLocator] that is associated with a specific [scope].
@@ -18,7 +19,7 @@ import dev.keyboardr.mapsl.keys.ServiceKey
  * will be used. This should generally only be true for tests.
  * @see getOrProvide
  */
-public open class ScopedServiceLocator<out S>(
+public open class ScopedServiceLocator<out S> @JvmOverloads constructor(
   public val scope: S,
   allowReregister: Boolean = false,
 ) :
@@ -64,6 +65,7 @@ public open class ScopedServiceLocator<out S>(
    * @param threadSafetyMode The thread safety mode for the lazy initialization.
    * @param provider A lambda that creates the service instance if one doesn't exist.
    */
+  @JvmOverloads
   public inline fun <reified T : Any> getOrProvide(
     noinline allowedScopes: (S) -> Boolean,
     threadSafetyMode: LazyThreadSafetyMode = defaultLazyKeyThreadSafetyMode,
@@ -129,6 +131,7 @@ public fun <S, T : Any, PutParams> ScopedServiceLocator<S>.getOrProvide(
  * @param threadSafetyMode The thread safety mode for the lazy initialization.
  * @param provider A lambda that creates the service instance if one doesn't exist.
  */
+@JvmOverloads
 public fun <S, T : Any> ScopedServiceLocator<S>.getOrProvide(
   key: LazyKey<T>,
   allowedScopes: (S) -> Boolean,

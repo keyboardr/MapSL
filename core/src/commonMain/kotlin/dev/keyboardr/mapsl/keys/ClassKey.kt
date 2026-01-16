@@ -3,6 +3,7 @@ package dev.keyboardr.mapsl.keys
 import dev.keyboardr.mapsl.ServiceLocator
 import dev.keyboardr.mapsl.classKey
 import dev.keyboardr.mapsl.keys.LazyKey.Companion.defaultLazyKeyThreadSafetyMode
+import kotlin.jvm.JvmOverloads
 import kotlin.reflect.KClass
 
 /**
@@ -69,6 +70,7 @@ public data class LazyClassKey<T : Any>(override val type: KClass<T>) : LazyKey<
  * @param threadSafetyMode The [LazyThreadSafetyMode] for the initialization.
  * @param provider A lambda that creates the service instance.
  */
+@JvmOverloads
 public inline fun <reified T : Any> ServiceLocator.put(
   threadSafetyMode: LazyThreadSafetyMode = defaultLazyKeyThreadSafetyMode,
   noinline provider: () -> T,

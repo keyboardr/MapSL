@@ -5,6 +5,7 @@ import dev.keyboardr.mapsl.keys.LazyKey.Companion.defaultLazyKeyThreadSafetyMode
 import dev.keyboardr.mapsl.keys.ServiceEntry
 import dev.keyboardr.mapsl.keys.ServiceKey
 import dev.keyboardr.mapsl.keys.put
+import kotlin.jvm.JvmOverloads
 import kotlin.reflect.KClass
 
 /**
@@ -18,7 +19,10 @@ import kotlin.reflect.KClass
  * @param allowReregister if true, allow registering keys multiple times. The latest registration
  * will be used. This should generally only be true for tests.
  */
-public open class SimpleServiceLocator<out S>(scope: S, allowReregister: Boolean = false) {
+public open class SimpleServiceLocator<out S> @JvmOverloads constructor(
+  scope: S,
+  allowReregister: Boolean = false
+) {
   private val backingServiceLocator = object : ScopedServiceLocator<S>(scope, allowReregister) {
     override fun <T : Any, GetParams> onMiss(
       key: ServiceKey<T, *, GetParams, *>,
@@ -72,6 +76,7 @@ public open class SimpleServiceLocator<out S>(scope: S, allowReregister: Boolean
    * @param threadSafetyMode The thread safety mode for the lazy initialization.
    * @param provider A lambda that creates the service instance.
    */
+  @JvmOverloads
   public fun <T : Any> put(
     key: KClass<T>,
     threadSafetyMode: LazyThreadSafetyMode = defaultThreadSafetyMode,
@@ -145,6 +150,7 @@ public open class SimpleServiceLocator<out S>(scope: S, allowReregister: Boolean
    * @param threadSafetyMode The thread safety mode for the lazy initialization.
    * @param provider A lambda that creates the service instance if one doesn't exist.
    */
+  @JvmOverloads
   public fun <T : Any> getOrProvide(
     key: KClass<T>,
     allowedScopes: (S) -> Boolean,
@@ -174,6 +180,7 @@ public open class SimpleServiceLocator<out S>(scope: S, allowReregister: Boolean
    * @param threadSafetyMode The thread safety mode for the lazy initialization.
    * @param provider A lambda that creates the service instance if one doesn't exist.
    */
+  @JvmOverloads
   public inline fun <reified T : Any> getOrProvide(
     noinline allowedScopes: (S) -> Boolean,
     threadSafetyMode: LazyThreadSafetyMode = defaultThreadSafetyMode,

@@ -2,6 +2,7 @@ package dev.keyboardr.mapsl.keys
 
 import dev.keyboardr.mapsl.ServiceLocator
 import kotlin.concurrent.Volatile
+import kotlin.jvm.JvmOverloads
 import kotlin.reflect.KClass
 
 /**
@@ -99,6 +100,7 @@ private fun ServiceLocator.getDefaultParams() =
  * @param threadSafetyMode The [LazyThreadSafetyMode] for the initialization.
  * @param provider A lambda that creates the service instance.
  */
+@JvmOverloads
 public fun <T : Any> ServiceLocator.put(
   key: LazyKey<T>,
   threadSafetyMode: LazyThreadSafetyMode = getDefaultParams().threadSafetyMode,

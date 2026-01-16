@@ -10,6 +10,7 @@ import dev.keyboardr.mapsl.keys.LazyKey.Companion.defaultLazyKeyThreadSafetyMode
 import dev.keyboardr.mapsl.keys.ServiceEntry
 import dev.keyboardr.mapsl.keys.ServiceKey
 import kotlin.concurrent.Volatile
+import kotlin.jvm.JvmOverloads
 import kotlin.reflect.KClass
 
 /**
@@ -50,7 +51,8 @@ public class LifecycleKey<T : Any>(override val type: KClass<T>) :
    * @param threadSafetyMode The [LazyThreadSafetyMode] for the service's lazy initialization.
    * @param provider A lambda that creates the service instance.
    */
-  public data class PutParams<T>(
+  public data class PutParams<T>
+  @JvmOverloads constructor(
     val minimumState: Lifecycle.State = Lifecycle.State.STARTED,
     val threadSafetyMode: LazyThreadSafetyMode,
     val provider: () -> T,
@@ -106,6 +108,7 @@ public class LifecycleKey<T : Any>(override val type: KClass<T>) :
  * @param provider A lambda that creates the service instance.
  */
 @ExperimentalKeyType
+@JvmOverloads
 public fun <T : Any> ServiceLocator.put(
   key: LifecycleKey<T>,
   minimumState: Lifecycle.State = Lifecycle.State.STARTED,
