@@ -27,6 +27,10 @@ public abstract interface class dev/keyboardr/mapsl/keys/ClassKey {
 	public abstract fun getType ()Lkotlin/reflect/KClass;
 }
 
+public final class dev/keyboardr/mapsl/keys/ClassKeyKt {
+	public static final synthetic fun put (Ldev/keyboardr/mapsl/ServiceLocator;Lkotlin/jvm/functions/Function0;)V
+}
+
 public class dev/keyboardr/mapsl/keys/FactoryKey : dev/keyboardr/mapsl/keys/ServiceKey {
 	public fun <init> (Lkotlin/reflect/KClass;)V
 	public synthetic fun createEntry (Ljava/lang/Object;)Ldev/keyboardr/mapsl/keys/ServiceEntry;
@@ -84,6 +88,7 @@ public final class dev/keyboardr/mapsl/keys/LazyKey$PutParams {
 
 public final class dev/keyboardr/mapsl/keys/LazyKeyKt {
 	public static final fun put (Ldev/keyboardr/mapsl/ServiceLocator;Ldev/keyboardr/mapsl/keys/LazyKey;Lkotlin/LazyThreadSafetyMode;Lkotlin/jvm/functions/Function0;)V
+	public static final fun put (Ldev/keyboardr/mapsl/ServiceLocator;Ldev/keyboardr/mapsl/keys/LazyKey;Lkotlin/jvm/functions/Function0;)V
 	public static synthetic fun put$default (Ldev/keyboardr/mapsl/ServiceLocator;Ldev/keyboardr/mapsl/keys/LazyKey;Lkotlin/LazyThreadSafetyMode;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
 }
 
